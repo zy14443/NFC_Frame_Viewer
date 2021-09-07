@@ -1,0 +1,1991 @@
+
+<STRUCTUREDEFS>
+<!-- ############################################ TEMPLATE DEFINITIONS ############################################ -->
+
+ <!-- ******************************************* NCI TEMPLATES ******************************************* -->
+
+ <TEMPLATE NAME="NCI_DATA_SEND" CONSTRAINTS="CALLONLY">
+   <AREA KIND="BITSOURCE" NAME="IDBYTES" BYTELENGTH="2"/>
+   <AREA KIND="ID" DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="0"  BITLENGTH="3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+ <TEMPLATE NAME="NCI_DATA_SEND_EXT" CONSTRAINTS="CALLONLY">
+   <AREA KIND="BITSOURCE" NAME="IDBYTES" BYTELENGTH="3"/>
+   <AREA KIND="ID" DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="0"  BITLENGTH="3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+  <TEMPLATE NAME="NCI_DATA_RECEIVE">
+   <AREA KIND="BITSOURCE" NAME="IDBYTES" BYTELENGTH="2"/>
+   <AREA KIND="ID" DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="0"  BITLENGTH="3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+ <TEMPLATE NAME="NCI_DATA_RECEIVE_EXT" CONSTRAINTS="CALLONLY">
+   <AREA KIND="BITSOURCE" NAME="IDBYTES" BYTELENGTH="3"/>
+   <AREA KIND="ID" DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="0"  BITLENGTH="3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+ <TEMPLATE NAME="NCI_CMD_NOTIF">
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="MSGBYTELENGTH" DATATYPE="byte" ADJUSTLEN="-3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+   <TEMPLATE NAME="NCI_CMD_NOTIF_woLN" >
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+  <TEMPLATE NAME="NCI_SPECIFIC_DATA" CONSTRAINTS="CALLONLY">
+   <AREA KIND="FIXED" BYTES="0x00 "/>
+   <AREA KIND="ID" DATATYPE="uint8"/>
+   <AREA KIND="MSGBYTELENGTH" DATATYPE="byte" ADJUSTLEN="-3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+  <TEMPLATE NAME="NCI_APP_CMD" CONSTRAINTS="CALLONLY">
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="BITSOURCE" NAME="CONTROLBYTES" BYTELENGTH="2"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+  <TEMPLATE NAME="NCI_SPD_CMD" >
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+   <TEMPLATE NAME="NCI_ECDSA_VERIFY_CMD" CONSTRAINTS="CALLONLY">
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+  <TEMPLATE NAME="NCI_HCINETWK_CMD" >
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="BITSOURCE" NAME="CONTROLBYTE" BYTELENGTH="2"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+  <TEMPLATE NAME="FRAME_LOG_NTF">
+   <AREA KIND="ID" DATATYPE="uint16_be"/>
+   <AREA KIND="BITSOURCE" NAME="CONTROLBYTE" BYTELENGTH="3"/>
+   <AREA KIND="PARAMS"/>
+ </TEMPLATE>
+
+
+<!-- ******************************************** NCI DATA MESSAGES ******************************************** -->
+
+ <STRUCTDEF NAME="DATA_MSG_SEND" ID="0x0" TEMPLATE="NCI_DATA_SEND"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="RFU"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="8"/>
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length" PRESENT_IF="(MSG_Length > 0)"/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="DATA_MSG_SEND_EXT" ID="0x0" TEMPLATE="NCI_DATA_SEND_EXT"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="MSG_Length_Low5"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="5"/>
+    <FIELDDEF NAME="FLAG"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="13"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CR"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="14"  BITLENGTH="2"/>
+    <FIELDDEF NAME="MSG_Length_High8"  DATATYPE="bits" BITSOURCEREF="IDBYTES" DEFAULT="1" LEFTBIT="16"  BITLENGTH="8"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length_High8" PRESENT_IF="(FLAG == 0)"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length_Low5 + MSG_Length_High8 * 32 " PRESENT_IF="(FLAG > 0) "/>
+</STRUCTDEF>
+
+  <STRUCTDEF NAME="DATA_MSG_RECEIVE" ID="0x0" TEMPLATE="NCI_DATA_RECEIVE"  KIND="DEVICE2HOST">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="RFU"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="8"/>
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length" PRESENT_IF="(MSG_Length > 0)"/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="DATA_MSG_RECEIVE_EXT" ID="0x0" TEMPLATE="NCI_DATA_RECEIVE_EXT"  KIND="DEVICE2HOST">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="MSG_Length_Low5"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="5"/>
+    <FIELDDEF NAME="FLAG"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="13"  BITLENGTH="1"/>
+    <FIELDDEF NAME="CR"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="14"  BITLENGTH="2"/>
+    <FIELDDEF NAME="MSG_Length_High8"  DATATYPE="bits" BITSOURCEREF="IDBYTES" DEFAULT="1" LEFTBIT="16"  BITLENGTH="8"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length_High8" PRESENT_IF="(FLAG == 0)"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length_Low5 + MSG_Length_High8 * 32 " PRESENT_IF="(FLAG > 0) "/>
+</STRUCTDEF>
+
+<!-- ******************************************** NCI CORE (GID = 0) MESSAGES ******************************************** -->
+
+
+<!-- NCI RESET -->
+ <STRUCTDEF NAME="RESET_CMD" ID="0x2000" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="Type"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="RESET_RSP" ID="0x4000" TEMPLATE="NCI_CMD_NOTIF_woLN" KIND="DEVICE2HOST">
+<FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	COMMENT="Length of the header message"/>
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NCI_Version"  DATATYPE="byte"  PRESENT_IF="(MSG_Length > 1)" />
+   <FIELDDEF NAME="ConfigStatus"  DATATYPE="byte"  PRESENT_IF="(MSG_Length > 1)" />
+
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="RESET_NTF" ID="0x6000" TEMPLATE="NCI_CMD_NOTIF_woLN" KIND="DEVICE2HOST">
+<FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	COMMENT="Length of the header message"/>
+   <FIELDDEF NAME="Reason"  DATATYPE="byte"  />
+   <FIELDDEF NAME="ConfigStatus"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NCI_Version"  DATATYPE="byte"  PRESENT_IF="(MSG_Length > 2)" />
+
+   <FIELDDEF NAME="ManufacturerID"  DATATYPE="byte"  PRESENT_IF="(MSG_Length > 2)" />
+   <FIELDDEF NAME="MInfoLen"  DATATYPE="byte"  PRESENT_IF="(MSG_Length > 2)"  />
+   <FIELDDEF NAME="ChipID"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 2)"  />
+   <FIELDDEF NAME="ChipVer"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 2)"  />
+   <FIELDDEF NAME="SecureMode_NVMType"  DATATYPE="byte" PRESENT_IF="(MInfoLen > 2 )" />
+   <FIELDDEF NAME="PatchMajorVer"  DATATYPE="byte" PRESENT_IF="(MInfoLen > 2 )" />
+   <FIELDDEF NAME="PatchMinorVer"  DATATYPE="byte" PRESENT_IF="(MInfoLen > 2 )" />
+   <FIELDDEF NAME="XtalFreq"  DATATYPE="uint16" PRESENT_IF="(MInfoLen > 2 )" />
+ </STRUCTDEF>
+
+
+<!-- NCI INIT -->
+  <STRUCTDEF NAME="INIT_CMD" ID="0x2001" TEMPLATE="NCI_CMD_NOTIF_woLN"  KIND="HOST2DEVICE">
+     <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="2" COMMENT="Length of the header message"/>
+     <FIELDDEF NAME="FeatureEnable"  DATATYPE="uint16"   DEFAULT="1" PRESENT_IF="(MSG_Length == 2)"/>
+ </STRUCTDEF>
+
+
+
+
+ <STRUCTDEF NAME="INIT_RSP" ID="0x4001" TEMPLATE="NCI_CMD_NOTIF_woLN" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"  COMMENT="Length of the header message"/>
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+     <FIELDDEF NAME="NCI_Features"  DATATYPE="uint32"  />
+
+     <FIELDDEF NAME="Max_conn"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="RoutingTable_MaxSize"  DATATYPE="uint16" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Max_control_Packet_Size"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+
+     <FIELDDEF NAME="MaxDataPktPayload"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_CreditsStaticHCI"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Max_NFCVFrameSize"  DATATYPE="uint16" PRESENT_IF="(MSG_Length > 28)" />
+
+     <FIELDDEF NAME="Num_RF_Interfaces"  DATATYPE="byte"  />
+
+     <FIELDDEF NAME="Interface_0"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_0"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_0" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_0 > 0)" />
+
+     <FIELDDEF NAME="Interface_1"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_1"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_1 > 0)" />
+
+     <FIELDDEF NAME="Interface_2"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_2"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_2 > 0)" />
+
+     <FIELDDEF NAME="Interface_3"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_3"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_3 > 0)" />
+
+     <FIELDDEF NAME="Interface_4"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_4"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_4" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_4 > 0)" />
+
+     <FIELDDEF NAME="Interface_5"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_5"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_5" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_5 > 0)" />
+
+     <FIELDDEF NAME="Interface_6"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Num_Extension_6"  DATATYPE="byte" PRESENT_IF="(MSG_Length > 28)" />
+     <FIELDDEF NAME="Supported_Extension_6" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(Num_Extension_6 > 0)" />
+
+     <FIELDDEF NAME="Supported_RF_Interfaces"  DATATYPE="byte" ARRAYSIZE="Num_RF_Interfaces" PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25) || (MSG_Length == 26)" />
+     <FIELDDEF NAME="Max_conn"  DATATYPE="byte"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25) || (MSG_Length == 26)" />
+     <FIELDDEF NAME="RoutingTable_MaxSize"  DATATYPE="uint16"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25) || (MSG_Length == 26)" />
+     <FIELDDEF NAME="Max_control_Packet_Size"  DATATYPE="byte"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25) || (MSG_Length == 26)" />
+     <FIELDDEF NAME="LargeParams_MaxSize"  DATATYPE="uint16"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25)|| (MSG_Length == 26)" />
+     <FIELDDEF NAME="Manu_Id"  DATATYPE="uint8"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) ||  (MSG_Length == 25) || (MSG_Length == 26)" />
+     <FIELDDEF NAME="Manu_Info"  DATATYPE="uint32"  PRESENT_IF="(MSG_Length == 23) || (MSG_Length == 24) || (MSG_Length == 25) || (MSG_Length == 26)" />
+
+ </STRUCTDEF>
+
+
+ <!-- NCI SET CONFIG -->
+ <STRUCTDEF NAME="SET_CONFIG_CMD" ID="0x2002" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte" DEFAULT="10" />
+
+   <FIELDDEF NAME="Parameter_ID"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 0)" />
+   <FIELDDEF NAME="Parameter_Len" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 0)" />
+   <FIELDDEF NAME="Parameter_Val" DATATYPE="byte" ARRAYSIZE="Parameter_Len" PRESENT_IF="(Parameter_Len > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_1"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 1)" />
+   <FIELDDEF NAME="Parameter_Len_1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 1)" />
+   <FIELDDEF NAME="Parameter_Val_1" DATATYPE="byte" ARRAYSIZE="Parameter_Len_1" PRESENT_IF="(Parameter_Len_1 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_2"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 2)" />
+   <FIELDDEF NAME="Parameter_Len_2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 2)" />
+   <FIELDDEF NAME="Parameter_Val_2" DATATYPE="byte" ARRAYSIZE="Parameter_Len_2" PRESENT_IF="(Parameter_Len_2 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_3"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 3)" />
+   <FIELDDEF NAME="Parameter_Len_3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 3)" />
+   <FIELDDEF NAME="Parameter_Val_3" DATATYPE="byte" ARRAYSIZE="Parameter_Len_3" PRESENT_IF="(Parameter_Len_3 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_4"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 4)" />
+   <FIELDDEF NAME="Parameter_Len_4" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 4)" />
+   <FIELDDEF NAME="Parameter_Val_4" DATATYPE="byte" ARRAYSIZE="Parameter_Len_4" PRESENT_IF="(Parameter_Len_4 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_5"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 5)" />
+   <FIELDDEF NAME="Parameter_Len_5" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 5)" />
+   <FIELDDEF NAME="Parameter_Val_5" DATATYPE="byte" ARRAYSIZE="Parameter_Len_5" PRESENT_IF="(Parameter_Len_5 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_6"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 6)" />
+   <FIELDDEF NAME="Parameter_Len_6" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 6)" />
+   <FIELDDEF NAME="Parameter_Val_6" DATATYPE="byte" ARRAYSIZE="Parameter_Len_6" PRESENT_IF="(Parameter_Len_6 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_7"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 7)" />
+   <FIELDDEF NAME="Parameter_Len_7" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 7)" />
+   <FIELDDEF NAME="Parameter_Val_7" DATATYPE="byte" ARRAYSIZE="Parameter_Len_7" PRESENT_IF="(Parameter_Len_7 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_8"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 8)" />
+   <FIELDDEF NAME="Parameter_Len_8" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 8)" />
+   <FIELDDEF NAME="Parameter_Val_8" DATATYPE="byte" ARRAYSIZE="Parameter_Len_8" PRESENT_IF="(Parameter_Len_8 > 0)" />
+
+   <FIELDDEF NAME="Parameter_ID_9"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 9)" />
+   <FIELDDEF NAME="Parameter_Len_9" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 9)" />
+   <FIELDDEF NAME="Parameter_Val_9" DATATYPE="byte" ARRAYSIZE="Parameter_Len_9" PRESENT_IF="(Parameter_Len_9 > 0)" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SET_CONFIG_RSP" ID="0x4002" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Parameter_ID" DATATYPE="byte" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+
+
+ <!-- NCI GET CONFIG -->
+ <STRUCTDEF NAME="GET_CONFIG_CMD" ID="0x2003" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Parameter_ID" DATATYPE="byte" ARRAYSIZE="(NumConfigs)" PRESENT_IF="(NumConfigs > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="GET_CONFIG_RSP" ID="0x4003" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Parameter_Val" DATATYPE="byte" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+
+
+ <!-- NCI CONN CREATE -->
+   <STRUCTDEF NAME="CREATE_CONN_CMD" ID="0x2004" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="DEST_TYPE"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumTlv"   DATATYPE="byte"  DEFAULT="1"/>
+   <FIELDDEF NAME="Tlv_tag"   DATATYPE="byte"   PRESENT_IF="(NumTlv > 0)"/>
+   <FIELDDEF NAME="Tlv_len"   DATATYPE="byte"  DEFAULT="1"  PRESENT_IF="(NumTlv > 0)"/>
+   <FIELDDEF NAME="Tlv_Data"   DATATYPE="byte" ARRAYSIZE="Tlv_len" PRESENT_IF="(Tlv_len > 0)" />
+ </STRUCTDEF>
+
+
+
+   <STRUCTDEF NAME="CREATE_CONN_RSP" ID="0x4004" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="BufferSize"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumberOfBuffers"  DATATYPE="byte"  />
+   <FIELDDEF NAME="ConnID"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+
+
+
+ <!-- NCI CONN CLOSE -->
+ <STRUCTDEF NAME="CLOSE_CONN_CMD" ID="0x2005" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="ConnID"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CLOSE_CONN_RSP" ID="0x4005" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+
+ <!-- NCI CREDITS -->
+  <STRUCTDEF NAME="CREDITS_CMD" ID="0x2006" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="ConnID_Credits" DATATYPE="byte" ARRAYSIZE="(NumConfigs * 2)" PRESENT_IF="(NumConfigs > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CREDITS_RSP" ID="0x4006" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CREDITS_NTF" ID="0x6006" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="ConnID_Credits" DATATYPE="byte" ARRAYSIZE="(NumConfigs * 2)" PRESENT_IF="(NumConfigs > 0)"/>
+ </STRUCTDEF>
+
+
+  <!-- NCI SET ROUTING POWER STATE -->
+  <!-- NCI SET POWER SUB STATE -->
+ <STRUCTDEF NAME="SET_POWER_SUB_STATE_CMD" ID="0x2009" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+ <FIELDDEF NAME="PowerState"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SET_POWER_SUB_STATE_RSP" ID="0x4009" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+ <!-- NCI GENERIC ERROR -->
+  <STRUCTDEF NAME="GENERIC_ERROR_RSP" ID="0x4007" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+     <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="GENERIC_ERROR_NTF" ID="0x6007" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+ <!-- NCI INTERFACE ERROR -->
+
+ <STRUCTDEF NAME="INTERFACE_ERROR_RSP" ID="0x4008" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="INTERFACE_ERROR_NTF" ID="0x6008" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Connid"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+<!-- ******************************************** NCI RF (GID = 1) MESSAGES ******************************************** -->
+
+
+ <!-- NCI DISCOVERY MAP -->
+  <STRUCTDEF NAME="DISCOVERY_MAP_CMD" ID="0x2100" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Params" DATATYPE="byte" ARRAYSIZE="(NumConfigs * 3)" PRESENT_IF="(NumConfigs > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DISCOVERY_MAP_RSP" ID="0x4100" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+
+ <!-- NCI SET ROUTING -->
+ <STRUCTDEF NAME="CONFIG_ROUTE_CMD" ID="0x2101" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="More"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumEntries"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Type0" DATATYPE="byte"  PRESENT_IF="(NumEntries > 0)"/>
+   <FIELDDEF NAME="Msg_Length0" DATATYPE="byte"  PRESENT_IF="(NumEntries > 0)"/>
+   <FIELDDEF NAME="Value0" DATATYPE="byte"  ARRAYSIZE="Msg_Length0" PRESENT_IF="(Msg_Length0 > 0)"/>
+   <FIELDDEF NAME="Type1" DATATYPE="byte"  PRESENT_IF="(NumEntries > 1)"/>
+   <FIELDDEF NAME="Msg_Length1" DATATYPE="byte"  PRESENT_IF="(NumEntries > 1)"/>
+   <FIELDDEF NAME="Value1" DATATYPE="byte"  ARRAYSIZE="Msg_Length1" PRESENT_IF="(Msg_Length1 > 0)"/>
+   <FIELDDEF NAME="Type2" DATATYPE="byte"  PRESENT_IF="(NumEntries > 2)"/>
+   <FIELDDEF NAME="Msg_Length2" DATATYPE="byte"  PRESENT_IF="(NumEntries > 2)"/>
+   <FIELDDEF NAME="Value2" DATATYPE="byte"  ARRAYSIZE="Msg_Length2" PRESENT_IF="(Msg_Length2 > 0)"/>
+   <FIELDDEF NAME="Type3" DATATYPE="byte"  PRESENT_IF="(NumEntries > 3)"/>
+   <FIELDDEF NAME="Msg_Length3" DATATYPE="byte"  PRESENT_IF="(NumEntries > 3)"/>
+   <FIELDDEF NAME="Value3" DATATYPE="byte"  ARRAYSIZE="Msg_Length3" PRESENT_IF="(Msg_Length3 > 0)"/>
+   <FIELDDEF NAME="Type4" DATATYPE="byte"  PRESENT_IF="(NumEntries > 4)"/>
+   <FIELDDEF NAME="Msg_Length4" DATATYPE="byte"  PRESENT_IF="(NumEntries > 4)"/>
+   <FIELDDEF NAME="Value4" DATATYPE="byte"  ARRAYSIZE="Msg_Length4" PRESENT_IF="(Msg_Length4 > 0)"/>
+   <FIELDDEF NAME="Type5" DATATYPE="byte"  PRESENT_IF="(NumEntries > 5)"/>
+   <FIELDDEF NAME="Msg_Length5" DATATYPE="byte"  PRESENT_IF="(NumEntries > 5)"/>
+   <FIELDDEF NAME="Value5" DATATYPE="byte"  ARRAYSIZE="Msg_Length5" PRESENT_IF="(Msg_Length5 > 0)"/>
+   <FIELDDEF NAME="Type6" DATATYPE="byte"  PRESENT_IF="(NumEntries > 6)"/>
+   <FIELDDEF NAME="Msg_Length6" DATATYPE="byte"  PRESENT_IF="(NumEntries > 6)"/>
+   <FIELDDEF NAME="Value6" DATATYPE="byte"  ARRAYSIZE="Msg_Length6" PRESENT_IF="(Msg_Length6 > 0)"/>
+   <FIELDDEF NAME="Type7" DATATYPE="byte"  PRESENT_IF="(NumEntries > 7)"/>
+   <FIELDDEF NAME="Msg_Length7" DATATYPE="byte"  PRESENT_IF="(NumEntries > 7)"/>
+   <FIELDDEF NAME="Value7" DATATYPE="byte"  ARRAYSIZE="Msg_Length7" PRESENT_IF="(Msg_Length7 > 0)"/>
+   <FIELDDEF NAME="Type8" DATATYPE="byte"  PRESENT_IF="(NumEntries > 8)"/>
+   <FIELDDEF NAME="Msg_Length8" DATATYPE="byte"  PRESENT_IF="(NumEntries > 8)"/>
+   <FIELDDEF NAME="Value8" DATATYPE="byte"  ARRAYSIZE="Msg_Length8" PRESENT_IF="(Msg_Length8 > 0)"/>
+   <FIELDDEF NAME="Type9" DATATYPE="byte"  PRESENT_IF="(NumEntries > 9)"/>
+   <FIELDDEF NAME="Msg_Length9" DATATYPE="byte"  PRESENT_IF="(NumEntries > 9)"/>
+   <FIELDDEF NAME="Value9" DATATYPE="byte"  ARRAYSIZE="Msg_Length9" PRESENT_IF="(Msg_Length9 > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CONFIG_ROUTE_RSP" ID="0x4101" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+ <!-- NCI GET ROUTING -->
+  <STRUCTDEF NAME="RETRIEVE_ROUTE_CMD" ID="0x2102" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="RETRIEVE_ROUTE_RSP" ID="0x4102" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="RETRIEVE_ROUTE_NTF" ID="0x6102" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="More"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumEntries"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RouteEntry" DATATYPE="byte" ARRAYSIZE="TOEND" PRESENT_IF="(NumEntries > 0)"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI START DISCOVERY -->
+ <STRUCTDEF NAME="START_DISCOVERY_CMD" ID="0x2103" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="NumConfigs"  DATATYPE="byte"  />
+   <FIELDDEF NAME="DiscoveryStartCmd" DATATYPE="byte" ARRAYSIZE="(NumConfigs * 2)" PRESENT_IF="(NumConfigs > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="START_DISCOVERY_RSP" ID="0x4103" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DISCOVERY_NTF" ID="0x6103" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Protocol"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RFTechnologyandMode"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RFParamLen"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RFTechSpecific"  DATATYPE="byte"  ARRAYSIZE="RFParamLen"  PRESENT_IF="(RFParamLen > 0)"/>
+   <FIELDDEF NAME="Type"  DATATYPE="byte"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI SELECT DISCOVERY -->
+  <STRUCTDEF NAME="SELECT_DISCOVERY_CMD" ID="0x2104" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Protocol"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Interface"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SELECT_DISCOVERY_RSP" ID="0x4104" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+ <!-- NCI ACTIVATE -->
+   <STRUCTDEF NAME="ACTIVATE_NTF" ID="0x6105" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="InterfaceType"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Protocol"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RFTechnology"  DATATYPE="byte"  />
+   <FIELDDEF NAME="MaxDataSize"  DATATYPE="byte"  />
+   <FIELDDEF NAME="InitialCredits"  DATATYPE="byte"  />
+   <FIELDDEF NAME="lenParams"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Data"  DATATYPE="byte"  ARRAYSIZE="lenParams"  PRESENT_IF="(lenParams > 0)"/>
+   <FIELDDEF NAME="DataTechnology"  DATATYPE="byte"  />
+   <FIELDDEF NAME="TxBitRate"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RxBitRate"  DATATYPE="byte"  />
+   <FIELDDEF NAME="lenActParams"  DATATYPE="byte"  />
+   <FIELDDEF NAME="ActParam"  DATATYPE="byte"  ARRAYSIZE="lenActParams"  PRESENT_IF="(lenActParams > 0)" />
+   </STRUCTDEF>
+
+ <!-- NCI DEACTIVATE -->
+    <STRUCTDEF NAME="DEACTIVATE_CMD" ID="0x2106" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="Type"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DEACTIVATE_RSP" ID="0x4106" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DEACTIVATE_NTF" ID="0x6106" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Type"  DATATYPE="byte"  />
+  <FIELDDEF NAME="Reason"  DATATYPE="byte"  />
+  </STRUCTDEF>
+
+   <!-- NCI RF FIELD INFO NTF -->
+ <STRUCTDEF NAME="RF_FIELD_INFO_NTF" ID="0x6107" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+  </STRUCTDEF>
+
+   <!-- NCI T3T POLL -->
+    <STRUCTDEF NAME="T3T_POLL_CMD" ID="0x2108" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="SENSF_REQ"  DATATYPE="byte" ARRAYSIZE="4" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="T3T_POLL_RSP" ID="0x4108" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="T3T_POLL_NTF" ID="0x6108" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumRsp"  DATATYPE="byte"  />
+   <FIELDDEF NAME="RspData"  DATATYPE="byte"  ARRAYSIZE="TOEND"/>
+ </STRUCTDEF>
+
+
+  <!-- NCI NFCEE ACTION -->
+ <STRUCTDEF NAME="NFCEE_ACTION_NTF" ID="0x6109" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+  <FIELDDEF NAME="TgtHandle"  DATATYPE="byte"  />
+  <FIELDDEF NAME="Trigger"  DATATYPE="byte"  />
+  <FIELDDEF NAME="SupportDataLen"  DATATYPE="byte"  />
+  <FIELDDEF NAME="SupportData"  DATATYPE="byte"  ARRAYSIZE="SupportDataLen" PRESENT_IF="(SupportDataLen > 0)"/>
+</STRUCTDEF>
+
+
+  <!-- NCI NFCEE ACTIVE -->
+ <STRUCTDEF NAME="NFCEE_DISCOVER_REQ_NTF" ID="0x610A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+  <FIELDDEF NAME="NUM_ENTRIES"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Type0" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 0)"/>
+   <FIELDDEF NAME="Msg_Length0" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 0)"/>
+   <FIELDDEF NAME="Value0" DATATYPE="byte"  ARRAYSIZE="Msg_Length0" PRESENT_IF="(Msg_Length0 > 0)"/>
+   <FIELDDEF NAME="Type1" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 1)"/>
+   <FIELDDEF NAME="Msg_Length1" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 1)"/>
+   <FIELDDEF NAME="Value1" DATATYPE="byte"  ARRAYSIZE="Msg_Length1" PRESENT_IF="(Msg_Length1 > 0)"/>
+   <FIELDDEF NAME="Type2" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 2)"/>
+   <FIELDDEF NAME="Msg_Length2" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 2)"/>
+   <FIELDDEF NAME="Value2" DATATYPE="byte"  ARRAYSIZE="Msg_Length2" PRESENT_IF="(Msg_Length2 > 0)"/>
+   <FIELDDEF NAME="Type3" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 3)"/>
+   <FIELDDEF NAME="Msg_Length3" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 3)"/>
+   <FIELDDEF NAME="Value3" DATATYPE="byte"  ARRAYSIZE="Msg_Length3" PRESENT_IF="(Msg_Length3 > 0)"/>
+   <FIELDDEF NAME="Type4" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 4)"/>
+   <FIELDDEF NAME="Msg_Length4" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 4)"/>
+   <FIELDDEF NAME="Value4" DATATYPE="byte"  ARRAYSIZE="Msg_Length4" PRESENT_IF="(Msg_Length4 > 0)"/>
+   <FIELDDEF NAME="Type5" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 5)"/>
+   <FIELDDEF NAME="Msg_Length5" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 5)"/>
+   <FIELDDEF NAME="Value5" DATATYPE="byte"  ARRAYSIZE="Msg_Length5" PRESENT_IF="(Msg_Length5 > 0)"/>
+   <FIELDDEF NAME="Type6" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 6)"/>
+   <FIELDDEF NAME="Msg_Length6" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 6)"/>
+   <FIELDDEF NAME="Value6" DATATYPE="byte"  ARRAYSIZE="Msg_Length6" PRESENT_IF="(Msg_Length6 > 0)"/>
+   <FIELDDEF NAME="Type7" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 7)"/>
+   <FIELDDEF NAME="Msg_Length7" DATATYPE="byte"  PRESENT_IF="(NUM_ENTRIES > 7)"/>
+   <FIELDDEF NAME="Value7" DATATYPE="byte"  ARRAYSIZE="Msg_Length7" PRESENT_IF="(Msg_Length7 > 0)"/>
+</STRUCTDEF>
+
+
+
+ <!-- NCI RF PARAMS UPDATE -->
+    <STRUCTDEF NAME="RF_UPDATE_PARAM_CMD" ID="0x210B" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="NumParams"  DATATYPE="byte"  />
+	<FIELDDEF NAME="Params"  DATATYPE="byte"  ARRAYSIZE="TOEND" PRESENT_IF="NumParams > 0"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="RF_UPDATE_PARAM_RSP" ID="0x410B" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+    <FIELDDEF NAME="NumParams"  DATATYPE="byte"  />
+	<FIELDDEF NAME="Params"  DATATYPE="byte"  ARRAYSIZE="NumParams" PRESENT_IF="NumParams > 0"/>
+ </STRUCTDEF>
+
+
+ <!-- RF LLCP SYMMETRY START -->
+    <STRUCTDEF NAME="RF_LLCP_SYMM_START_CMD" ID="0x210C" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="REMOTE_LINK_TO"  DATATYPE="byte" />
+    <FIELDDEF NAME="LOCAL_LINK_TO"  DATATYPE="byte" />
+ </STRUCTDEF>
+
+ <!-- NCI RF INTF EXT START -->
+    <STRUCTDEF NAME="RF_INTF_EXT_START_CMD" ID="0x210C" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="RF_INT_EXT_TYPE"  DATATYPE="byte" />
+    <FIELDDEF NAME="START_PARAM_LENGTH"  DATATYPE="byte" />
+    <FIELDDEF NAME="START_PARAM_DATA"  DATATYPE="byte"  ARRAYSIZE="(START_PARAM_LENGTH)" PRESENT_IF="(START_PARAM_LENGTH > 0)" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="RF_INTF_EXT_START_RSP" ID="0x410C" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <!-- RF LLCP SYMMETRY STOP -->
+    <STRUCTDEF NAME="RF_LLCP_SYMM_STOP_CMD" ID="0x210D" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+  </STRUCTDEF>
+
+ <!-- NCI RF INTF EXT STOP -->
+    <STRUCTDEF NAME="RF_INTF_EXT_STOP_CMD" ID="0x210D" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+    <FIELDDEF NAME="RF_INT_EXT_TYPE"  DATATYPE="byte"  />
+    <FIELDDEF NAME="PARAM_LENGTH"  DATATYPE="byte"  />
+    <FIELDDEF NAME="PARAM" DATATYPE="byte" ARRAYSIZE="PARAM_LENGTH" PRESENT_IF="(PARAM_LENGTH > 0)" />
+ </STRUCTDEF>
+ <STRUCTDEF NAME="RF_INTF_EXT_STOP_RSP" ID="0x410D" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+ <!-- NCI RF AGGR ABORT-->
+    <STRUCTDEF NAME="AGGR_ABORT_CMD" ID="0x210E" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="AGGR_ABORT_RSP" ID="0x410E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+<!-- NCI RF AGGR ABORT-->
+<STRUCTDEF NAME="ISO_DEP_NAK_PRESENCE_CMD" ID="0x2110" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="ISO_DEP_NAK_PRESENCE_RSP" ID="0x4110" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+</STRUCTDEF>
+
+<STRUCTDEF NAME="ISO_DEP_NAK_PRESENCE_NTF" ID="0x6110" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+</STRUCTDEF>
+
+<!-- ******************************************** NCI NFCEE (GID = 2) MESSAGES ******************************************** -->
+
+<!-- NCI DISCOVER NFCEE -->
+ <STRUCTDEF NAME="DISCOVER_NFCEE_CMD" ID="0x2200" TEMPLATE="NCI_CMD_NOTIF_woLN" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="1" COMMENT="Length of the header message"/>
+   <FIELDDEF NAME="Discovery_Action"  DATATYPE="uint8"   DEFAULT="1" PRESENT_IF="(MSG_Length == 1)"/>
+  </STRUCTDEF>
+
+ <STRUCTDEF NAME="DISCOVER_NFCEE_RSP" ID="0x4200" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" />
+   <FIELDDEF NAME="NumberofNfcee"   DATATYPE="byte"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DISCOVER_NFCEE_NTF" ID="0x6200" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NfceeStatus"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NumProt"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NfceeProtocols"  DATATYPE="byte" ARRAYSIZE="NumProt" PRESENT_IF="(NumProt > 0)" />
+   <FIELDDEF NAME="NoOfTLV"  DATATYPE="byte" />
+   <FIELDDEF NAME="Type0" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 0)"/>
+   <FIELDDEF NAME="Length0" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 0)"/>
+   <FIELDDEF NAME="Value0" DATATYPE="byte"  ARRAYSIZE="Length0" PRESENT_IF="(Length0 > 0)"/>
+   <FIELDDEF NAME="Type1" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 1)"/>
+   <FIELDDEF NAME="Length1" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 1)"/>
+   <FIELDDEF NAME="Value1" DATATYPE="byte"  ARRAYSIZE="Length1" PRESENT_IF="(Length1 > 0)"/>
+   <FIELDDEF NAME="Type2" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 2)"/>
+   <FIELDDEF NAME="Length2" DATATYPE="byte"  PRESENT_IF="(NoOfTLV > 2)"/>
+   <FIELDDEF NAME="Value2" DATATYPE="byte"  ARRAYSIZE="Length2" PRESENT_IF="(Length2 > 0)"/>
+   <FIELDDEF NAME="NFCEEPowerSupply" DATATYPE="byte" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+
+<!-- NCI NFCEE MODE SET -->
+ <STRUCTDEF NAME="NFCEE_MODE_SET_CMD" ID="0x2201" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NfceeMode" DATATYPE="byte" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NFCEE_MODE_SET_RSP" ID="0x4201" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NFCEE_MODE_SET_NTF" ID="0x6201" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+  <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NFCEE_STATUS_NTF" ID="0x6202" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+  <FIELDDEF NAME="NFCEEID"  DATATYPE="byte"  />
+  <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+ <!-- NCI NFCEE MODE SET -->
+ <STRUCTDEF NAME="NFCEE_POWER_AND_LINK_CNTRL_CMD" ID="0x2203" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="TargetHandle"  DATATYPE="byte"  />
+   <FIELDDEF NAME="NFCEE_Configuration" DATATYPE="byte" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NFCEE_POWER_AND_LINK_CNTRL_RSP" ID="0x4203" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+<!-- ******************************************** NCI TESTING (GID = 3) MESSAGES ******************************************** -->
+
+<!-- NCI PROP NFWL LOG -->
+ <STRUCTDEF NAME="NFWL_LOG_CMD" ID="0x2300" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Commands to configure/enable/disable hw-fw Logging from NFCC">
+    <FIELDDEF NAME="CtrlCmdType" DATATYPE="byte" DEFAULT="1" COMMENT="Flag to enable FW logging with default configuration"/>
+    <FIELDDEF NAME="LogChIdPause" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 2)" COMMENT="Identifier of the log channel which shall be muted for further log generation"/>
+    <FIELDDEF NAME="LogChIdResume" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 3)" COMMENT="Identifier of the log channel which shall be re-enabled for further log generation"/>
+    <FIELDDEF NAME="LogPull" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 4)" COMMENT="Identifier of the log channel which shall be re-enabled for further log generation"/>
+
+    <FIELDDEF NAME="loggingEn" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Enable FW logging with following configuration"/>
+    <FIELDDEF NAME="usageModel" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Indicates log retrieval process: 0=> PULL, 1=> PUSH"/>
+    <FIELDDEF NAME="logQHighWM" DATATYPE="byte" DEFAULT="3" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Sets the watermark in FW queue : e.g. 1=> 1/4 of FW queue size 1=>"/>
+    <FIELDDEF NAME="logQMode" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Sets the mode of log queue: e.g 1=>FREE_RUNNING/CIRCULAR, 2=> HALT_WHEN_FULL/LINEAR"/>
+    <FIELDDEF NAME="limitlogLen" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Used to restrict the log frame size; must be power of two; used when configured for circular buffering"/>
+    <FIELDDEF NAME="logTransporterId" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="Dynamic function selector for transporting FW logged data to host"/>
+    <FIELDDEF NAME="channelCnt" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 5)" COMMENT="User for specific channel configuration"/>
+    <FIELDDEF NAME="logChCfgInfo" DATATYPE="byte" ARRAYSIZE="(channelCnt + channelCnt)" PRESENT_IF="(channelCnt > 0)" COMMENT="channel_id[x], channel_ctrl: en/dis"/>
+
+    <FIELDDEF NAME="logMmSizeInKb" DATATYPE="byte" DEFAULT="28" PRESENT_IF="(CtrlCmdType == 0x80)" COMMENT="HW log queue size; shall always be a multiple of 4 and less than equal to 28"/>
+
+    <FIELDDEF NAME="hlcMaskEvtId" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x83)" COMMENT="HW logger event identifier to be disabled. HW logger is known to be stopped"/>
+    <FIELDDEF NAME="hlcUnMaskEvtId" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x84)" COMMENT="HW logger event identifier to be enabled. HW logger is known to be stopped"/>
+
+    <FIELDDEF NAME="matchCtrlMode" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Used for CLF pattern based HW logging: 0=>any bit matched, 1=>all bits matched"/>
+    <FIELDDEF NAME="matchPat0" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Reference Pattern Lowest byte"/>
+    <FIELDDEF NAME="matchMask0" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Bit selector for matchPat0 for comparison"/>
+    <FIELDDEF NAME="matchPat1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Reference Pattern 2nd byte"/>
+    <FIELDDEF NAME="matchMask1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Bit selector for matchPat1 for comparison"/>
+    <FIELDDEF NAME="matchPat2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Reference Pattern 3rd byte"/>
+    <FIELDDEF NAME="matchMask2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Bit selector for matchPat2 for comparison"/>
+    <FIELDDEF NAME="matchPat3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Reference Pattern MSbyte" />
+    <FIELDDEF NAME="matchMask3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Bit selector for matchPat3 for comparison"/>
+    <FIELDDEF NAME="startTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Identifier of the HW log record which will trigger the Hw logging"/>
+    <FIELDDEF NAME="stopTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x86)" COMMENT="Identifier of the HW log record which will stop the Hw logging "/>
+
+    <FIELDDEF NAME="startRecTyp" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x87)" COMMENT="Identifier of the HW log record which will turn on HW logging. HW logger is known to be stopped"/>
+    <FIELDDEF NAME="stopRecTyp" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x87)" COMMENT="Identifier of the HW log record which will stop HW logging. HW logger is known to be stopped"/>
+
+    <FIELDDEF NAME="startTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x88)" COMMENT="Identifier of the HW log record which will turn on HW logging. HW logger is known to be stopped"/>
+
+    <FIELDDEF NAME="stopTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x89)" COMMENT="Identifier of the HW log record which will stop HW logging. HW logger is known to be stopped"/>
+
+    <FIELDDEF NAME="EvtSet" DATATYPE="uint32" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 0x8A)" COMMENT="HW logger event set id: 0=> Modem event group(EVG0) 1=> CLF event group(EVG1)"/>
+    <FIELDDEF NAME="Mask" DATATYPE="uint32" DEFAULT="0xFFFFFF2" PRESENT_IF="(CtrlCmdType == 0x8A)" COMMENT="Mask value to be assigned to the event set mentioned above"/>
+
+    <FIELDDEF NAME="TimerId" DATATYPE="byte" DEFAULT="0x0" PRESENT_IF="(CtrlCmdType == 0x8B)" COMMENT="For debug and verification of HW logger timer"/>
+    <FIELDDEF NAME="EnRdLowByte" DATATYPE="byte" DEFAULT="0x0" PRESENT_IF="(CtrlCmdType == 0x8B)" />
+
+    <FIELDDEF NAME="evt0Mask" DATATYPE="uint32" DEFAULT="0x82020000" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="Parameters for configuring HW and FW circular log buffering: for Hw logger Modem Event Mask "/>
+	<FIELDDEF NAME="evt1Mask" DATATYPE="uint32" DEFAULT="0x80000289" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="CLF event mask: 0x8xxx_xxxx(xxx_xxxx will be applied), 0x0xxx_xxxx(xxx_xxxx will not be applied)"/>
+    <FIELDDEF NAME="enHWLogger" DATATYPE="uint8" DEFAULT="0x1" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="Flag to enable/disable HW logging"/>
+    <FIELDDEF NAME="hwWatermark" DATATYPE="uint8" DEFAULT="0x20" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="HW logger watermark. Interrupt point. Default 4KB"/>
+    <FIELDDEF NAME="enFwLogger" DATATYPE="uint8" DEFAULT="0x1" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="Flag to enable/disable FW logging"/>
+    <FIELDDEF NAME="fwWatermark" DATATYPE="uint8" DEFAULT="0x3" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="FW logger watermark. Dump event generation point. Default 3/4 of total log queue size"/>
+    <FIELDDEF NAME="logChmask" DATATYPE="uint32" DEFAULT="0x00006079" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="FW log channel mask. Default enabled channel: Modem, Clf and setup"/>
+    <FIELDDEF NAME="logTransId" DATATYPE="uint8" DEFAULT="0x0" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="FW logger transport channel(NCI/DBG UART)"/>
+    <FIELDDEF NAME="limitLogLen" DATATYPE="uint8" DEFAULT="0x0" PRESENT_IF="(CtrlCmdType == 0x8E)" COMMENT="FW logger dump length limiter"/>
+
+    <FIELDDEF NAME="CfgFldIdx" DATATYPE="byte" DEFAULT="0x0" PRESENT_IF="(CtrlCmdType == 0x8F)" COMMENT="Identifier HW logger configuration item"/>
+    <FIELDDEF NAME="CfgFldVal" DATATYPE="uint16" DEFAULT="0x00" PRESENT_IF="(CtrlCmdType == 0x8F)" COMMENT="Value HW logger configuration item"/>
+
+    <FIELDDEF NAME="matchCtrlMode" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)" COMMENT="As explained in 0x86 command type. But applies the changes after disabling HW logger and re-enables HW logger"/>
+    <FIELDDEF NAME="matchPat0" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchMask0" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchPat1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchMask1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchPat2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchMask2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchPat3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="matchMask3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="startTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+    <FIELDDEF NAME="stopTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x90)"/>
+
+    <FIELDDEF NAME="startTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x91)" COMMENT="As explained in 0x88 command type. But applies the changes after disabling HW logger and re-enables HW logger"/>
+    <FIELDDEF NAME="stopTrig" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x92)" COMMENT="As explained in 0x88 command type. But applies the changes after disabling HW logger and re-enables HW logger"/>
+    <FIELDDEF NAME="startStopTrig" DATATYPE="uint16" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x93)" COMMENT="As explained in 0x87 command type. But applies the changes after disabling HW logger and re-enables HW logger"/>
+
+    <FIELDDEF NAME="evtMask0" DATATYPE="uint32" DEFAULT="0x82020000" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="Parameters for configuring HW and FW circular log buffering: for Hw logger Modem Event Mask "/>
+	<FIELDDEF NAME="evtMask1" DATATYPE="uint32" DEFAULT="0x80000289" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="CLF event mask: 0x8xxx_xxxx(xxx_xxxx will be applied), 0x0xxx_xxxx(xxx_xxxx will not be applied)"/>
+    <FIELDDEF NAME="enHWLogger" DATATYPE="uint8" DEFAULT="0x1" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="Flag to enable/disable HW logging"/>
+    <FIELDDEF NAME="hwWatermark" DATATYPE="uint8" DEFAULT="0x20" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="HW logger watermark. Interrupt point. Default 4KB"/>
+    <FIELDDEF NAME="logPushModeEn" DATATYPE="byte" DEFAULT="0x1" PRESENT_IF="(CtrlCmdType == 0x95)"/>
+    <FIELDDEF NAME="logSizeInKb" DATATYPE="byte" DEFAULT="28" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="HW log queue size; shall always be a multiple of 4 and less than equal to 28"/>
+    <FIELDDEF NAME="startTrigger" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="Identifier of the HW log record which will turn on HW logging. HW logger is known to be stopped"/>
+    <FIELDDEF NAME="stopTrigger" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT="Identifier of the HW log record which will stop HW logging. HW logger is known to be stopped"/>
+    <FIELDDEF NAME="startDelay" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)"/>
+    <FIELDDEF NAME="stopDelay" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)"/>
+    <FIELDDEF NAME="cntStartTrigIgnore" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)"/>
+    <FIELDDEF NAME="cntStopTrigIgnore" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)"/>
+    <FIELDDEF NAME="delayMd" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT = "Resolution for trigger delays "/>
+    <FIELDDEF NAME="decimationFactors" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT = "Decimation Rate: Values = 1, 2, 4,..., 32"/>
+    <FIELDDEF NAME="mdmDbgBlockSel" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT = "Select the modem block to be debugged"/>
+    <FIELDDEF NAME="extraMdmDbgSel" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT = " Value for modem_logger_dm_dbg_ctrl register"/>
+    <FIELDDEF NAME="allowRollover" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(CtrlCmdType == 0x95)" COMMENT = "Logger will wrap at the end of log memory"/>
+
+    <FIELDDEF NAME="mdmLogErrTyp" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x9E)" COMMENT="Parameter to select the modem error type; for retreival"/>
+
+    <FIELDDEF NAME="mdmLogErrTyp" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x9F)" COMMENT="Parameter to enable/disable modem local error counter"/>
+    <FIELDDEF NAME="offIndType" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(CtrlCmdType == 0x9F)"/>
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="NFWL_LOG_RSP" ID="0x4300" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to NFWL_LOG_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="NFWL_HW_LOG_NTF" ID="0x633A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="NTF carrying HW logs">
+  <FIELDDEF NAME="Data"      DATATYPE="byte" ARRAYSIZE="TOEND" DISPLAYARRAYBLOCKSIZE="32" COMMENT=" HW Logged Frame Data."/>
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="NFWL_FW_LOG_NTF" ID="0x6339" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" NTF carrying FW logs">
+  <FIELDDEF NAME="Data"    DATATYPE="byte"  ARRAYSIZE="TOEND"	DISPLAYARRAYBLOCKSIZE="32" COMMENT="Logged Frame Data"/>
+</STRUCTDEF>
+
+
+  <STRUCTDEF NAME="NCI_PROP_DUMPREG_CMD" ID="0x2F39" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to read out registers">
+   <FIELDDEF NAME="Start_Address"  DATATYPE="uint32" COMMENT="Starting register address" />
+   <FIELDDEF NAME="Length"  DATATYPE="uint16" COMMENT="Byte length to be read out" />
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NCI_PROP_DUMPREG_RSP" ID="0x4F39" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NCI_PROP_DUMPREG_NTF" ID="0x6F39" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" NTF carrying FW logs">
+  <FIELDDEF NAME="Data"    DATATYPE="byte"  ARRAYSIZE="TOEND"	COMMENT="Logged Frame Data"/>
+</STRUCTDEF>
+
+<!-- NCI TESTING RF INFO -->
+  <STRUCTDEF NAME="RF_TEST_CMD" ID="0x2300" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE">
+   <FIELDDEF NAME="Action"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Technology"  DATATYPE="byte"  />
+   <FIELDDEF NAME="BitRate"  DATATYPE="byte"  />
+   <FIELDDEF NAME="Timeout"  DATATYPE="uint16"  />
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="RF_TEST_RSP" ID="0x4300" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="RF_TEST_NTF" ID="0x6300" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  />
+ </STRUCTDEF>
+
+<!-- ******************************************** NCI PROPRIETARY (GID = 15) MESSAGES ******************************************** -->
+
+<!-- NCI PROP SETMEM -->
+ <STRUCTDEF NAME="SETMEM_CMD" ID="0x2F00" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Used to setup the Tag memory if using CE in NFCC">
+<FIELDDEF NAME="TagSize"  DATATYPE="uint16"  COMMENT="Total size of the tag memory. The first SETMEM_CMD initialize the size of memory block. If set to 0x0, reset the memory block." />
+<FIELDDEF NAME="Addr"  DATATYPE="uint16" COMMENT="Starting Address" />
+<FIELDDEF NAME="Len"  DATATYPE="byte"  COMMENT=" Length of data being programmed" />
+<FIELDDEF NAME="Value" DATATYPE="byte" ARRAYSIZE="Len" PRESENT_IF="(Len > 0)" COMMENT="Data to program"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SETMEM_RSP" ID="0x4F00" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" Response to SETMEM command" >
+ <FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI return Status"/>
+ </STRUCTDEF>
+
+
+<!-- NCI PROP GETMEM -->
+<STRUCTDEF NAME="GETMEM_CMD" ID="0x2F01" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Used to read out the Tag memory used for CE in NFCC">
+<FIELDDEF NAME="Addr"  DATATYPE="uint16"  COMMENT="Starting Address from which to read memory; will read out the maximum possible in a single NCI packet" />
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="GETMEM_RSP" ID="0x4F01" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" Response to GETMEM command">
+<FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI return Status"/>
+<FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="TOEND" COMMENT="Returned Data bytes"/>
+</STRUCTDEF>
+
+<!-- NCI PROP GET CONFIG -->
+ <STRUCTDEF NAME="VSC_GET_CONFIG_CMD" ID="0x2F02" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Proprietary Command to get VSC config items at a specific offset">
+   <FIELDDEF NAME="NumEntries" DATATYPE="byte" DEFAULT="1" COMMENT="To specify the number of set config entries"/>
+   <FIELDDEF NAME="id0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="id9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The byte length to be read in the config entry"/>
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="VSC_GET_CONFIG_RSP" ID="0x4F02" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to VSC_GET_CONFIG_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+   <FIELDDEF NAME="NumEntries" DATATYPE="byte" PRESENT_IF="Status == 0" DEFAULT="1" COMMENT="To specify the number of set config entries"/>
+   <FIELDDEF NAME="id0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len0" DATATYPE="byte" PRESENT_IF="(NumEntries > 0)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data0" DATATYPE="byte" ARRAYSIZE="len0" PRESENT_IF="(len0 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len1" DATATYPE="byte" PRESENT_IF="(NumEntries > 1)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data1" DATATYPE="byte" ARRAYSIZE="len1" PRESENT_IF="(len1 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len2" DATATYPE="byte" PRESENT_IF="(NumEntries > 2)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data2" DATATYPE="byte" ARRAYSIZE="len2" PRESENT_IF="(len2 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len3" DATATYPE="byte" PRESENT_IF="(NumEntries > 3)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data3" DATATYPE="byte" ARRAYSIZE="len3" PRESENT_IF="(len3 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len4" DATATYPE="byte" PRESENT_IF="(NumEntries > 4)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data4" DATATYPE="byte" ARRAYSIZE="len4" PRESENT_IF="(len4 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len5" DATATYPE="byte" PRESENT_IF="(NumEntries > 5)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data5" DATATYPE="byte" ARRAYSIZE="len5" PRESENT_IF="(len5 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len6" DATATYPE="byte" PRESENT_IF="(NumEntries > 6)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data6" DATATYPE="byte" ARRAYSIZE="len6" PRESENT_IF="(len6 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len7" DATATYPE="byte" PRESENT_IF="(NumEntries > 7)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data7" DATATYPE="byte" ARRAYSIZE="len7" PRESENT_IF="(len7 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len8" DATATYPE="byte" PRESENT_IF="(NumEntries > 8)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data8" DATATYPE="byte" ARRAYSIZE="len8" PRESENT_IF="(len8 > 0)" COMMENT="Config data"/>
+   <FIELDDEF NAME="id9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The ID of the config entry"/>
+   <FIELDDEF NAME="offset9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The byte offset to be read in the config entry"/>
+   <FIELDDEF NAME="len9" DATATYPE="byte" PRESENT_IF="(NumEntries > 9)" COMMENT="The byte length to be read in the config entry"/>
+   <FIELDDEF NAME="data9" DATATYPE="byte" ARRAYSIZE="len9" PRESENT_IF="(len9 > 0)" COMMENT="Config data"/>
+ </STRUCTDEF>
+
+
+
+<!-- NCI PROP PEEK POKE -->
+ <STRUCTDEF NAME="Super_Duper_Peek_Poke" ID="0x2F03" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Command to directly write/read the NFCC memory addresses.">
+   <FIELDDEF NAME="AccessType" DATATYPE="byte" DEFAULT="6" COMMENT="Register access type. 0x06: Single 32bit memory peek. 0x07: Multiple 32bit memory peek. 0x08: Single 32bit memory poke. 0x09: Multiple 8bit memory peek. 0x0A: Multiple 8bit memory poke."/>
+   <FIELDDEF NAME="Address" DATATYPE="uint32" DEFAULT="0" COMMENT="Starting Register address"/>
+   <FIELDDEF NAME="Count" DATATYPE="byte" DEFAULT="1" COMMENT="Length of value. Depending on the access type, can be in 32bit or 8bit."/>
+   <FIELDDEF NAME="Value32" DATATYPE="uint32" ARRAYSIZE="Count" PRESENT_IF="(AccessType == 8)" COMMENT="Value in 32bit" />
+   <FIELDDEF NAME="Value8" DATATYPE="byte" ARRAYSIZE="Count" PRESENT_IF="(AccessType == 10)" COMMENT="Value in 8bit" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="Super_Duper_Peek_Poke_Resp" ID="0x4F03" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST" COMMENT="Response to directly write/read the NFCC memory addresses.">
+   <FIELDDEF NAME="Status" DATATYPE="byte" COMMENT="NFCC return status" />
+   <FIELDDEF NAME="AccessType" DATATYPE="byte" PRESENT_IF="Status == 0" COMMENT="Register access type. 0x06: Single 32bit memory peek. 0x07: Multiple 32bit memory peek. 0x08: Single 32bit memory poke. 0x09: Multiple 8bit memory peek. 0x0A: Multiple 8bit memory poke." />
+   <FIELDDEF NAME="Address" DATATYPE="uint32" PRESENT_IF="Status == 0" COMMENT="Starting Register address" />
+   <FIELDDEF NAME="Count" DATATYPE="byte" PRESENT_IF="Status == 0" COMMENT="Length of value. Depending on the access type, can be in 32bit or 8bit." />
+   <FIELDDEF NAME="Value32" DATATYPE="uint32" ARRAYSIZE="Count" PRESENT_IF="(AccessType == 6) || (AccessType == 7) || (AccessType ==8)" COMMENT="Value in 32 bit" />
+   <FIELDDEF NAME="Value8" DATATYPE="byte" ARRAYSIZE="Count" PRESENT_IF="(AccessType == 9) || (AccessType == 10)" COMMENT="Value in byte" />
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="Super_Duper_32Bit_ARM_Peek" ID="0x2F03" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Read single 32bit memory address">
+   <FIELDDEF NAME="AccessType" DATATYPE="byte" DEFAULT="6" READONLY="1"/>
+   <FIELDDEF NAME="Address" DATATYPE="uint32" DEFAULT="0" COMMENT="Register address"/>
+   <FIELDDEF NAME="RFU" DATATYPE="byte" DEFAULT="0" READONLY="1" COMMENT="Reserved"/>
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="Super_Duper_32Bit_ARM_Poke" ID="0x2F03" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Write single 32bit memory address" >
+   <FIELDDEF NAME="AccessType" DATATYPE="byte" DEFAULT="8" READONLY="1" COMMENT="AccessType=0x08, single 32bit poke."/>
+   <FIELDDEF NAME="Address" DATATYPE="uint32" DEFAULT="0" COMMENT="Register address"/>
+   <FIELDDEF NAME="RFU" DATATYPE="byte" DEFAULT="0" READONLY="1" COMMENT="Reserved"/>
+   <FIELDDEF NAME="Value" DATATYPE="uint32" COMMENT=" 32-bit value to write" />
+ </STRUCTDEF>
+
+
+<!-- NCI PROP BUILDINFO -->
+<STRUCTDEF NAME="GET_BUILD_INFO_CMD" ID="0x2F04" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Command to obtain the build info of the NFCC FW">
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="GET_BUILD_INFO_RSP" ID="0x4F04" TEMPLATE="NCI_CMD_NOTIF_woLN" KIND="DEVICE2HOST" COMMENT="Response to the GET_BUILD_INFO_CMD">
+<FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	COMMENT="Length of the header message"/>
+<FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI Return Status"/>
+<FIELDDEF NAME="FWDate"  DATATYPE="string"  LENGTH = "11" COMMENT="FW Date info"/>
+<FIELDDEF NAME="FWTime"  DATATYPE="string"  LENGTH = "8" COMMENT="FW Time stamp"/>
+<FIELDDEF NAME="FWMajor"  DATATYPE="byte"  COMMENT="Major version of the NFCC FW release"/>
+<FIELDDEF NAME="FWMinor"  DATATYPE="byte"  COMMENT="Minor version of the NFCC FW release"/>
+<FIELDDEF NAME="FWVersion"  DATATYPE="uint16"  COMMENT="FW version"/>
+<FIELDDEF NAME="HWTs"    DATATYPE="uint32" COMMENT="Corresponding ASIC or FPGA chip version number"/>
+<FIELDDEF NAME="ChipNumLen"  DATATYPE="byte"  COMMENT="Length of chip version name"/>
+<FIELDDEF NAME="ChipNumber"    DATATYPE="string" LENGTH = "ChipNumLen" COMMENT="Chip version"/>
+<FIELDDEF NAME="XTAL_Freq_Index" DATATYPE="uint16" PRESENT_IF="(MSG_Length > 36)" COMMENT="XTAL Frequency Index" />
+<FIELDDEF NAME="XTAL_Freq" DATATYPE="uint16" PRESENT_IF="(MSG_Length > 36)" COMMENT="XTAL Frequency" />
+<FIELDDEF NAME="InternalMinorVer" DATATYPE="uint16" PRESENT_IF="(MSG_Length > 36)" COMMENT="Internal Minor Version" />
+<FIELDDEF NAME="ExternalMinorVer" DATATYPE="uint16" PRESENT_IF="(MSG_Length > 36)" COMMENT="External Minor Version" />
+<FIELDDEF NAME="CustomerID" DATATYPE="uint8" PRESENT_IF="(MSG_Length > 36)" COMMENT="Customer ID" />
+<FIELDDEF NAME="ProductID" DATATYPE="uint8" PRESENT_IF="(MSG_Length > 36)" COMMENT="Product ID" />
+</STRUCTDEF>
+
+
+
+<STRUCTDEF NAME="SCRIPT_DOWNLOAD_CMD" ID="0x1" TEMPLATE="NCI_DATA_SEND"  KIND="HOST2DEVICE">
+   <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+   <FIELDDEF NAME="GID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4" DEFAULT="15"/>
+   <FIELDDEF NAME="RFU"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="2"/>
+   <FIELDDEF NAME="OID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="10"  BITLENGTH="6" DEFAULT="0x2C"/>
+   <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+   <FIELDDEF NAME="More"  DATATYPE="byte"/>
+   <FIELDDEF NAME="Data"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="((MSG_Length - 1) > 0)"/>
+</STRUCTDEF>
+
+<!-- NCI PROP SCR CMD EXEC -->
+ <STRUCTDEF NAME="SCR_EXEC_CMD" ID="0x1" TEMPLATE="NCI_DATA_SEND"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1"/>
+    <FIELDDEF NAME="GID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4" DEFAULT="0xF"/>
+    <FIELDDEF NAME="RFU"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="8"  BITLENGTH="2"/>
+    <FIELDDEF NAME="OID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="10"  BITLENGTH="6" DEFAULT="0x2B"/>
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+    <FIELDDEF NAME="More"  DATATYPE="byte"/>
+    <FIELDDEF NAME="Data"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="((MSG_Length - 1) > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SCR_RUN_CMD" ID="0x2F2A" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+   <FIELDDEF NAME="param0" DATATYPE="byte" DEFAULT="0"/>
+   <FIELDDEF NAME="param1" DATATYPE="byte" DEFAULT="0"/>
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="SCRIPT_DOWNLOAD_RSP" ID="0x4F2C" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the script download command">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+
+<STRUCTDEF NAME="SET_HCI_NETWK_CMD" ID="0x2F05" TEMPLATE="NCI_HCINETWK_CMD" KIND="HOST2DEVICE" COMMENT="Command to set the UICC info retrieved from hci_network_ntf from the device host">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+    <FIELDDEF NAME="HID"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="6" COMMENT="Host ID"/>
+    <FIELDDEF NAME="isLast"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="14"  BITLENGTH="1" COMMENT="Assert if this is the last SET_HCI_NETWK_CMD for this Host ID. If there is only one SET_HCI_NETWK_CMD, both isLast and isFirst are TRUE. "/>
+    <FIELDDEF NAME="isFirst"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="15"  BITLENGTH="1" COMMENT="Assert if this is the first SET_HCI_NETWK_CMD for this Host ID. All the previous info would be reset."/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="UICC info to be restored for this Host ID."/>
+ </STRUCTDEF>
+
+
+<STRUCTDEF NAME="SET_HCI_NETWK_RSP" ID="0x4F05" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the SET_HCI_NETWK_CMD">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="NCI Return Status"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="HCI_NETWK_NTF" ID="0x6F05" TEMPLATE="NCI_HCINETWK_CMD" KIND="DEVICE2HOST" COMMENT="UICC info notification">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+    <FIELDDEF NAME="hid"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="6" COMMENT="Host ID"/>
+    <FIELDDEF NAME="isLast"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="14"  BITLENGTH="1" COMMENT="Assert if this is the last SET_HCI_NETWK_CMD for this Host ID. If there is only one HCI_NETWK_NTF, both isLast and isFirst are TRUE. "/>
+    <FIELDDEF NAME="isFirst"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="15"  BITLENGTH="1" COMMENT="Assert if this is the first SET_HCI_NETWK_CMD for this Host ID."/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="UICC info to be restored for this Host ID."/>
+ </STRUCTDEF>
+
+
+<!-- NCI PROP PWRLEVEL -->
+ <STRUCTDEF NAME="SET_POWER_LEVEL_CMD" ID="0x2F08" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Set Power level">
+   <FIELDDEF NAME="Power_Level" DATATYPE="byte" DEFAULT="1" COMMENT="New Power level"/>
+   <FIELDDEF NAME="LPM_Uicc" DATATYPE="byte" DEFAULT="0xF3" COMMENT="Low Power Mode UICC"/>
+   <FIELDDEF NAME="LPM_ListenTech" DATATYPE="byte" DEFAULT="0x03" COMMENT="Low Power Mode Listening Mask"/>
+   <FIELDDEF NAME="DownloadPatchInCe4" DATATYPE="byte" DEFAULT="0" COMMENT="CE3 Switch Off mode enable: Bit[0]-SO enable, Bit[1]-LPO off in SO, Bit[2]-FW Vbat Monitor enable, Bit[3]-Very Stubborn bit, Bit[7:5]-Primary Threshold"/>
+   <FIELDDEF NAME="forceChangePowerLevel" DATATYPE="byte" DEFAULT="0" COMMENT="Unused."/>
+   <FIELDDEF NAME="Debug" DATATYPE="byte" DEFAULT="0" COMMENT="Unused."/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="SET_POWER_LEVEL_RSP" ID="0x4F08" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SET_POWER_LEVEL_CMD">
+  <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status" />
+</STRUCTDEF>
+
+ <!-- NCI PROP FRAME LOG -->
+ <STRUCTDEF NAME="FRAME_LOG_CMD" ID="0x2F09" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to enable/disable Frame Logging from NFCC">
+   <FIELDDEF NAME="nfcEnabled" DATATYPE="byte" DEFAULT="1" COMMENT="If set to non zero value will enable RF frame logging"/>
+   <FIELDDEF NAME="swpEnabled" DATATYPE="byte" DEFAULT="1" COMMENT="If set to non zero will enable SWP frame logging"/>
+   <FIELDDEF NAME="felicaSpiEnabled" DATATYPE="byte" DEFAULT="1" COMMENT="If set to non zero will enable felica SPI frame logging"/>
+ </STRUCTDEF>
+
+
+  <STRUCTDEF NAME="FRAME_LOG_RSP" ID="0x4F09" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to FRAME_LOG_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NFC_FRAME_LOG_NTF" ID="0x6F09" TEMPLATE="FRAME_LOG_NTF" KIND="DEVICE2HOST" COMMENT="RF Frame Logging NTF">
+  <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+  <FIELDDEF NAME="ByteLen_bits_0_2" DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="3"  COMMENT="bits 0-2 of byteLen"/>
+  <FIELDDEF NAME="BitLen" DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="11"  BITLENGTH="3"  COMMENT="bit length"/>
+  <FIELDDEF NAME="fixed" DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="14"  BITLENGTH="1"  COMMENT="fixed as 1"/>
+  <FIELDDEF NAME="isTx" DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="15"  BITLENGTH="1"  COMMENT="0 for RX and 1 for TX frame"/>
+  <FIELDDEF NAME="ByteLen_bits_3_10" DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="16"  BITLENGTH="8"  COMMENT="bits 3-10 of byte length"/>
+
+  <FIELDDEF NAME="TimeStamp" DATATYPE="uint32"  COMMENT="FW Time Stamp. It is a down Counter"/>
+  <FIELDDEF NAME="Protocol"  DATATYPE="uint8"  COMMENT="RF Protocol/Technology used  during this Frame"/>
+  <FIELDDEF NAME="Data"      DATATYPE="byte" ARRAYSIZE="MSG_Length-7" COMMENT="Logged Frame Data"/>
+</STRUCTDEF>
+
+
+ <STRUCTDEF NAME="ISODEP_ERROR_INFO_NTF" ID="0x6F19" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Notification to report ISO-DEP error. Set config item 0xB5 byte[0] to enable/disable this notification. ">
+   <FIELDDEF NAME="Code"  DATATYPE="byte" COMMENT="Error code" />
+   <FIELDDEF NAME="Connid"  DATATYPE="byte" COMMENT="Connection ID" />
+ </STRUCTDEF>
+
+
+<!-- NCI PROP UICC READER DISCOVERY NTF -->
+<STRUCTDEF NAME="UICC_READER_START_DISCOVERY_NTF" ID="0x6F0A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="UICC Reader Discovery Activate NTF">
+  <FIELDDEF NAME="Event"  DATATYPE="byte" COMMENT="Protocol"/>
+  <FIELDDEF NAME="EventParams"  DATATYPE="byte" ARRAYSIZE="TOEND" COMMENT="Polling Technology"/>
+</STRUCTDEF>
+
+<!-- NCI PROP SET CONFIG -->
+ <STRUCTDEF NAME="VSC_SET_CONFIG_CMD" ID="0x2F0B" TEMPLATE="NCI_HCINETWK_CMD" KIND="HOST2DEVICE" COMMENT="Command to set VSC config items at a specific offset">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+    <FIELDDEF NAME="cnt"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="8" COMMENT="Host ID"/>
+    <FIELDDEF NAME="Data"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="UICC info to be restored for this Host ID."/>
+</STRUCTDEF>
+
+
+ <STRUCTDEF NAME="VSC_SET_CONFIG_RSP" ID="0x4F0B" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to VSC_SET_CONFIG_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI PROP ISR LOG NTF -->
+
+
+ <LISTDEF NAME="InterruptTypeValues">
+  <NAMEVALUEPAIR NAME=" INTERRUPT_TX " VALUE="0x00" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_RX " VALUE="0x01" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_TGT " VALUE="0x02" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_SWP " VALUE="0x03" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_SWP1 " VALUE="0x04" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_BOC " VALUE="0x05" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_PRQ " VALUE="0x06" />
+  <NAMEVALUEPAIR NAME=" INTERRUPT_SWP2 " VALUE="0x07" />
+</LISTDEF>
+
+
+<!-- NCI PROP SETPBRS -->
+<STRUCTDEF NAME="PRBS_SET_CMD" ID="0x2F0C" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Command to enable PRBS test mode">
+  <FIELDDEF NAME="PRBSEn"  DATATYPE="byte"  COMMENT=" If non zero will enable PRBS else will disable it"/>
+  <FIELDDEF NAME="PRBSTech"  DATATYPE="byte"  COMMENT="RF Technology to be used for PRBS Testing"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="PRBS_SET_RSP" ID="0x4F0C" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" Response to PRBS_SET_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI Return Status"/>
+</STRUCTDEF>
+
+
+  <!-- NCI PROP DL_MINIDRIVER_CMD -->
+ <STRUCTDEF NAME="DL_MINIDRIVER_CMD" ID="0x2F0F" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to perform Serial Flash read/write">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DL_MINIDRIVER_RSP" ID="0x4F0F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the SF_RW_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status"  />
+ </STRUCTDEF>
+
+ <!-- NCI PROP DL_MINIDRIVER_CMD -->
+
+   <STRUCTDEF NAME="Update_UART_Baud_Rate_Cmd" ID="0x2F0D" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to dynamically change UART Baud rate" >
+   <FIELDDEF NAME="Encoded_Baud_Rate" DATATYPE="byte" DEFAULT="0" COMMENT="Unused"/>
+   <FIELDDEF NAME="Use_Encoded_Form" DATATYPE="byte" DEFAULT="0" COMMENT="Unused"/>
+   <FIELDDEF NAME="Explicit_Baud_Rate" DATATYPE="uint32" DEFAULT="921600" COMMENT="Baud rate"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="Update_UART_Baud_Rate_Resp" ID="0x4F0D" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status" DATATYPE="byte"  COMMENT="NCI Return Status" />
+ </STRUCTDEF>
+
+
+
+
+  <!-- NCI PROP SERIAL FLASH RW -->
+ <STRUCTDEF NAME="SF_RW_CMD" ID="0x2F0E" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to perform Serial Flash read/write">
+    <FIELDDEF NAME="SlaveSel"  DATATYPE="uint8" COMMENT="Spiffy2 slave select between CS0(0x00) and CS1(0x01)"  />
+    <FIELDDEF NAME="Opcode"    DATATYPE="uint8" COMMENT="Serial Flash Cmd Opcodes"  />
+    <FIELDDEF NAME="Offset"    DATATYPE="uint16" COMMENT="Address on the SF for read/write" />
+    <FIELDDEF NAME="Length"    DATATYPE="uint8"  DEFAULT="0x1" COMMENT="Number of bytes to read/write"/>
+    <FIELDDEF NAME="Data"      DATATYPE="uint8" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SF_RW_RSP" ID="0x4F0E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the SF_RW_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SF_RW_NTF" ID="0x6F0E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="SF read/write notification">
+    <FIELDDEF NAME="SlaveSel"  DATATYPE="uint8" COMMENT="Spiffy2 slave select between CS0(0x00) and CS1(0x01)"  />
+    <FIELDDEF NAME="Opcode"    DATATYPE="uint8" COMMENT="SF Cmd Opcodes"  />
+    <FIELDDEF NAME="Offset"    DATATYPE="uint16" COMMENT="Address on the SF for read/write" />
+    <FIELDDEF NAME="Length"    DATATYPE="uint8" COMMENT="Number of bytes read/written"  />
+    <FIELDDEF NAME="Data"      DATATYPE="uint8" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+
+<!-- NCI PROP ANTSELFTEST -->
+<STRUCTDEF NAME="ANTENNA_SELF_TEST_CMD" ID="0x2F10" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Command to perform Antenna self test">
+   <FIELDDEF NAME="T1"  DATATYPE="uint32" COMMENT="Low threshold for estimated average power"/>
+   <FIELDDEF NAME="T2"  DATATYPE="uint32" COMMENT="High threshold for estimated average power"/>
+   <FIELDDEF NAME="scalingFactor"  DATATYPE="byte"  DEFAULT="0x08" COMMENT="Number of power samples to average, power of two" />
+   <FIELDDEF NAME="mode"  DATATYPE="byte"  DEFAULT="0x00" COMMENT="0x00=ANTTEST_MODE_DEFAULT; 0x01=ANTTEST_MODE_11BIT; 0x02=ANTTEST_MODE_DCEST; 0x04=ANTTEST_MODE_TXGAIN; 0x08=ANTTEST_MODE_RX; 0x10=ANTTEST_MODE_HSMODE; 0x20=ANTTEST_MODE_SLOW; 0x40=ANTTEST_MODE_REPORT_VALUE" />
+   <FIELDDEF NAME="cfg_txgain"  DATATYPE="byte"  DEFAULT="0x7E" COMMENT="SWK value loaded into Antenna tx gain config (ant_cfg_txgain) when ANTTEST_MODE_TXGAIN is enabled" />
+   <FIELDDEF NAME="cfg_rx"  DATATYPE="byte"  DEFAULT="0x0F" COMMENT="SWK value loaded Antenna rx config (ant_cfg_rx) when ANTTEST_MODE_RX is enabled" />
+</STRUCTDEF>
+
+<STRUCTDEF NAME="ANTENNA_SELF_TEST_RSP" ID="0x4F10" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to ANTENNA_SELF_TEST_CMD">
+   <FIELDDEF NAME="Pass"  DATATYPE="byte" COMMENT="SWK Status; 0x00 = pass, 0x03 = fail" />
+   <FIELDDEF NAME="Value" DATATYPE="uint32" COMMENT="SWK Value; Power value (I^2 + Q^2) if  ANTTEST_MODE_REPORT_VALUE is enabled." />
+</STRUCTDEF>
+
+<!-- NCI PROP SET NCI MAX PKT SIZE -->
+<STRUCTDEF NAME="NCIP_SET_NCI_MAX_PKT_SIZE_CMD" ID="0x2F11" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT=" Command to set limit NCI packet size on transport">
+   <FIELDDEF NAME="maxSize"  DATATYPE="byte"  COMMENT="NFCC will limit the max Packet size to this value"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="NCIP_SET_NCI_MAX_PKT_SIZE_RSP" ID="0x4F11" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST" COMMENT="Response to NCIP_SET_NCI_MAX_PKT_SIZE_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status" />
+</STRUCTDEF>
+
+<!-- NCI PROP SET NCI MAX PKT SIZE -->
+<STRUCTDEF NAME="NCIP_SET_NCI_VERSION_CMD" ID="0x2F12" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT=" Command to switch between NCI 1.1 and NCI 2.0">
+   <FIELDDEF NAME="NCI_Version"  DATATYPE="byte"  DEFAULT="0x20" COMMENT="To use NCI 1.1, set to 0x11; To use NCI 2.0, set to 0x20. All the other value is invalid."/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="NCIP_SET_NCI_VERSION_RSP" ID="0x4F12" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST" COMMENT="Response to NCIP_SET_NCI_VERSION_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI Return Status" />
+   <FIELDDEF NAME="MInfoLen"  DATATYPE="byte" COMMENT="Byte length of the manufacture information appended"/>
+   <FIELDDEF NAME="ChipID"  DATATYPE="byte" COMMENT="Chip ID number. 0x0=20791, 0x1=43341, 0x2=20795, 0x3=20796, 0x4=20797, 0x5=43018."/>
+   <FIELDDEF NAME="ChipVer"  DATATYPE="byte" COMMENT="Chip Version. 0x0=A, 0x1=B, 0x2=C, 0x3=D."/>
+   <FIELDDEF NAME="SecureMode_NVMType"  DATATYPE="byte" COMMENT="NVM type. 0x0=SRAM, 0x1=EEPROM, 0x2=UICC2."/>
+   <FIELDDEF NAME="PatchMajorVer"  DATATYPE="byte" COMMENT="Patch version: major."/>
+   <FIELDDEF NAME="PatchMinorVer"  DATATYPE="byte" COMMENT="Patch version: minor."/>
+   <FIELDDEF NAME="XtalFreq"  DATATYPE="uint16" COMMENT="Crystal Frequency (kHz)."/>
+</STRUCTDEF>
+
+<!-- NCI ANTENNA TUNING MEASUREMENT -->
+
+<STRUCTDEF NAME="NCI_ANTENNA_MSMT_CMD" ID="0x2F13" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to measure antenna tune characteristics with NFCTestTool">
+   <FIELDDEF NAME="measMode"  DATATYPE="byte" DEFAULT="0" COMMENT="0x00=ANTTUNING_MEASMODE_NONE, 0x01=ANTTUNING_MEASMODE_FREQ_MEASURE, 0x02=ANTTUNING_MEASMODE_TAG_THRESHOLDS, 0x03=ANTTUNING_MEASMODE_RDR_GAIN_CFG, 0xFF=ANTTUNING_MEASMODE_GET_OVERALL_ALGORITHM_VERSION"/>
+   <FIELDDEF NAME="paramSize" DATATYPE="byte" DEFAULT="0" COMMENT="The size of the parameter array"/>
+   <FIELDDEF NAME="paramData" DATATYPE="byte" ARRAYSIZE="paramSize" PRESENT_IF="(paramSize > 0)" COMMENT="The parameters vary based on the measurement mode"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NCI_ANTENNA_MSMT_RSP" ID="0x4F13" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Antenna measurement status / results">
+   <FIELDDEF NAME="status"   DATATYPE="byte" COMMENT="NCI return status"/>
+   <FIELDDEF NAME="measMode" DATATYPE="byte" COMMENT="Current measurement mode"/>
+   <FIELDDEF NAME="measSize" DATATYPE="byte" DEFAULT="0" COMMENT="The size of the antenna data array"/>
+   <FIELDDEF NAME="measData" DATATYPE="byte" ARRAYSIZE="TOEND" COMMENT="The measurement data returned varies based on the measurement mode"/>
+ </STRUCTDEF>
+
+<!-- ECDSA Verify Header command -->
+   <STRUCTDEF NAME="NFC_ECDSA256_VERIFY_HDR_CMD" ID="0x2F16" TEMPLATE="NCI_ECDSA_VERIFY_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the ECDSA verify data">
+    <FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	DEFAULT="3" READONLY="1" COMMENT="Length of the header message"/>
+    <FIELDDEF NAME="Type"       	DATATYPE="byte" 	DEFAULT="0" READONLY="1" COMMENT="Message Type - Header" />
+    <FIELDDEF NAME="fp_mem_size"    DATATYPE="uint16"   COMMENT="Fixed point array size"/>
+ </STRUCTDEF>
+
+ <!-- ECDSA Pre G command -->
+   <STRUCTDEF NAME="NFC_ECDSA256_PRE_G_DATA_CMD" ID="0x2F16" TEMPLATE="NCI_ECDSA_VERIFY_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the ECDSA verify data">
+    <FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"       	DATATYPE="byte" 	DEFAULT="1" READONLY="1" COMMENT="Message Type - Header" />
+    <FIELDDEF NAME="DATA"  			DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+  <!-- ECDSA Pre Q command -->
+   <STRUCTDEF NAME="NFC_ECDSA256_PRE_Q_DATA_CMD" ID="0x2F16" TEMPLATE="NCI_ECDSA_VERIFY_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the ECDSA verify data">
+    <FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"       	DATATYPE="byte" 	DEFAULT="2" READONLY="1" COMMENT="Message Type - Header" />
+    <FIELDDEF NAME="DATA"  			DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+   <!-- ECDSA Verify Signature command -->
+   <STRUCTDEF NAME="NFC_ECDSA256_VERIFY_SIG_CMD" ID="0x2F16" TEMPLATE="NCI_ECDSA_VERIFY_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the data and signature to verify the ECDSA algorithm">
+    <FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	DEFAULT="1" READONLY="1" COMMENT="Length of the signature verify message"/>
+    <FIELDDEF NAME="Type"       	DATATYPE="byte" 	DEFAULT="3" READONLY="1" COMMENT="Message Type - Header" />
+    <FIELDDEF NAME="DATA"           DATATYPE="byte"     ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NFC_ECDSA256_VERIFY_RSP" ID="0x4F16" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the Secure patch download command">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+<!-- NCI PROP LOOPBACK -->
+ <STRUCTDEF NAME="NCI_PROP_SELF_LOOPBACK_CMD" ID="0x2F17" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Self loopback testing">
+    <FIELDDEF NAME="Loopback"        DATATYPE="byte" DEFAULT="1" COMMENT="0-disable 1-enable "/>
+	<FIELDDEF NAME="Direction"       DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT="0-Rdr2Tag 1-Tag2Rdr"/>
+	<FIELDDEF NAME="Tech_Type"       DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT="0x85-NFCA 0x86-NFCB 0x87-NFCF 0x89-NFCV"/>
+	<FIELDDEF NAME="Bit_Rate"        DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT="0-106 1-212 2-424 3-848"/>
+	<FIELDDEF NAME="Rxmode"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT="0-almRx 1-voltRx"/>
+	<FIELDDEF NAME="NumPkt"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" Number of packets to tx and rx"/>
+	<FIELDDEF NAME="AutoGen"		 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" Indicate to firmware to auto generate packets 1-FW generate 0-DH generated"/>
+	<FIELDDEF NAME="RFU0"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" RFU "/>
+	<FIELDDEF NAME="RFU1"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" RFU "/>
+	<FIELDDEF NAME="RFU2"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" RFU "/>
+    <FIELDDEF NAME="RFU3"			 DATATYPE="uint8" PRESENT_IF="(Loopback == 1)" COMMENT=" RFU "/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="SELF_LOOPBACK_RSP" ID="0x4F17" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Self Loopback Response">
+    <FIELDDEF NAME="Status"  DATATYPE="uint8" />
+</STRUCTDEF>
+
+<STRUCTDEF NAME="SELF_LOOPBACK_LOG_NTF" ID="0x6F34" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="OTA Loopback Logging NTF">
+  <FIELDDEF NAME="isTx"      DATATYPE="uint8"  COMMENT=" if 1 it is a Tx Frame ; if 0 it is a RX Frame"/>
+  <FIELDDEF NAME="TimeStamp" DATATYPE="uint32"  COMMENT="FW Time Stamp. It is a down Counter"/>
+  <FIELDDEF NAME="Tech"  DATATYPE="uint16"  COMMENT="RF Technology used during this Frame"/>
+  <FIELDDEF NAME="Direction"  DATATYPE="uint16"  COMMENT="0 rdr2tag 1 tag2rdr"/>
+  <FIELDDEF NAME="BitRate"    DATATYPE="uint8"  COMMENT="Bit Rate used during this Frame"/>
+  <FIELDDEF NAME="RFU0" DATATYPE="uint32"  COMMENT="RFU0"/>
+  <FIELDDEF NAME="RFU1" DATATYPE="uint32"  COMMENT="RFU1"/>
+  <FIELDDEF NAME="RFU2" DATATYPE="uint32"  COMMENT="RFU2"/>
+  <FIELDDEF NAME="RFU3" DATATYPE="uint32"  COMMENT="RFU3"/>
+  <FIELDDEF NAME="ByteLen"   DATATYPE="uint8"  COMMENT="Length of data following"/>
+  <FIELDDEF NAME="Data"      DATATYPE="byte" ARRAYSIZE="TOEND" COMMENT="Logged Frame Data. Only records first 24 bytes"/>
+</STRUCTDEF>
+
+<!-- NCI PROP STATISTICS -->
+ <STRUCTDEF NAME="STATISTICS_CMD" ID="0x2F18" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Read or Clear Statistics information">
+   <FIELDDEF NAME="Function"  DATATYPE="byte" COMMENT="0 = Statistics Mode - 0=clear statistics, 1=read statistics" />
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="STATISTICS_RSP" ID="0x4F18" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Statistics information cleared">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT=" NCI Return Status" />
+ </STRUCTDEF>
+
+
+<STRUCTDEF NAME="STATISTICS_NTF" ID="0x6F18" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Statistics">
+   <FIELDDEF NAME="Type"            DATATYPE="byte" />
+
+   <!-- LPTD Statistics -->
+   <FIELDDEF NAME="I0"              DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Detection I Sample"/>
+   <FIELDDEF NAME="Q0"              DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Detection Q Sample"/>
+   <FIELDDEF NAME="vectorMetric0"   DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="Detection Vector Metric"/>
+   <FIELDDEF NAME="I1"              DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Detection I Sample"/>
+   <FIELDDEF NAME="Q1"              DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Detection Q Sample"/>
+   <FIELDDEF NAME="vectorMetric1"   DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="Detection Vector Metric"/>
+   <FIELDDEF NAME="IQIdx"           DATATYPE="uint8"  PRESENT_IF="(Type == 1)"      COMMENT="Index of last sample in circular buffer above"/>
+   <FIELDDEF NAME="IQSampled"       DATATYPE="uint8"  PRESENT_IF="(Type == 1)"      COMMENT="Reference status - 0x01 reference is set"/>
+   <FIELDDEF NAME="I_Ref"           DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Reference I Sample"/>
+   <FIELDDEF NAME="Q_Ref"           DATATYPE="int16"  PRESENT_IF="(Type == 1)"      COMMENT="Reference Q Sample"/>
+   <FIELDDEF NAME="totalCnt"        DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="LPTD Scheduler count"/>
+   <FIELDDEF NAME="falseDetectCnt"  DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="False detects since discovery start"/>
+   <FIELDDEF NAME="noDetectCnt"     DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="Sniff polls without tag detection"/>
+   <FIELDDEF NAME="refSniffCnt"     DATATYPE="uint32" PRESENT_IF="(Type == 1)"      COMMENT="Reference sniffs since discovery start"/>
+   <FIELDDEF NAME="totalDuration"   DATATYPE="uint16" PRESENT_IF="(Type == 1)"      COMMENT="LPTD duty cycle in ms"/>
+
+   <FIELDDEF NAME="TagRSSI"         DATATYPE="uint32" PRESENT_IF="(Type == 2)"      COMMENT="Actual TAG mode RSSI"/>
+   <FIELDDEF NAME="TagRSSIReg"      DATATYPE="uint16" PRESENT_IF="(Type == 2)"      COMMENT="TAG mode RSSI Register Value"/>
+   <FIELDDEF NAME="TagFreqGain"     DATATYPE="uint8"  PRESENT_IF="(Type == 2)"      COMMENT="TAG mode Frequency Gain"/>
+   <FIELDDEF NAME="TagUseALM"       DATATYPE="uint8"  PRESENT_IF="(Type == 2)"      COMMENT="TAG mode Use ALM"/>
+   <FIELDDEF NAME="clfDelay"        DATATYPE="uint32" PRESENT_IF="(Type == 5)"      COMMENT="NFCC CLF Processing Time (us), - need add SWP Tx/Rx time"/>
+   <FIELDDEF NAME="rxDataLen"       DATATYPE="uint16" PRESENT_IF="(Type == 5)"      COMMENT="NFCC Rx Data Length (byte)"/>
+   <FIELDDEF NAME="txDataLen"       DATATYPE="uint16" PRESENT_IF="(Type == 5)"      COMMENT="NFCC Tx Data Length (byte)"/>
+   <FIELDDEF NAME="IblockCnt"       DATATYPE="uint8"  PRESENT_IF="(Type == 5)"      COMMENT="PCD I-block count (pair), - to add 11 bytes per pair SWP transmission time"/>
+   <FIELDDEF NAME="TotalSMBs"       DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Total Small Memory Blocks"/>
+   <FIELDDEF NAME="FreeSMBs"        DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Free Small Memory Blocks"/>
+   <FIELDDEF NAME="UsedSMBs"        DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Used Small Memory Blocks"/>
+   <FIELDDEF NAME="TotalLMBs"       DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Total Large Memory Blocks"/>
+   <FIELDDEF NAME="FreeLMBs"        DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Free Large Memory Blocks"/>
+   <FIELDDEF NAME="UsedLMBs"        DATATYPE="uint8"  PRESENT_IF="(Type == 128)"    COMMENT="Used Large Memory Blocks"/>
+</STRUCTDEF>
+
+
+ <STRUCTDEF NAME="NCIP_EXTENDED_CMD" ID="0x2F1A" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="NCI Extended Generic CMD" >
+   <FIELDDEF NAME="SubType" DATATYPE="byte" DEFAULT="0" COMMENT="SubType"/>
+   <FIELDDEF NAME="Data"    DATATYPE="byte" ARRAYSIZE="TOEND"	COMMENT="Generic Data"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NCIP_EXTENDED_RSP" ID="0x4F1A" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="NCI Extended Generic RSP" >
+   <FIELDDEF NAME="Status"  DATATYPE="byte" DEFAULT="0" COMMENT="Status"/>
+   <FIELDDEF NAME="SubType" DATATYPE="byte" DEFAULT="0" COMMENT="SubType"/>
+   <FIELDDEF NAME="Data"    DATATYPE="byte" ARRAYSIZE="TOEND"	COMMENT="Generic Data"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NCIP_EXTENDED_NTF" ID="0x6F1A" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="NCI Extended Generic NTF" >
+   <FIELDDEF NAME="SubType" DATATYPE="byte" DEFAULT="0" COMMENT="SubType"/>
+   <FIELDDEF NAME="Data"    DATATYPE="byte" ARRAYSIZE="TOEND"	COMMENT="Generic Data"/>
+ </STRUCTDEF>
+
+
+
+
+
+<!-- ******************************************** NCI Sleep Mode MESSAGES ******************************************** -->
+
+ <STRUCTDEF NAME="Set_Sleepmode_Param" ID="0x2F1B" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Command to set sleep mode parameters" >
+   <FIELDDEF NAME="Sleep_Mode" DATATYPE="byte" DEFAULT="0" COMMENT="Set TRUE to enable sleep mode."/>
+   <FIELDDEF NAME="Idle_Threshold_Host" DATATYPE="byte" DEFAULT="0"/>
+   <FIELDDEF NAME="Idle_Threshold_HC" DATATYPE="byte" DEFAULT="0" />
+   <FIELDDEF NAME="HOST_WAKE_Active_Mode" DATATYPE="byte" DEFAULT="0"/>
+   <FIELDDEF NAME="Combine_Sleep_Mode_And_LPM" DATATYPE="byte" DEFAULT="0" COMMENT=" Set FALSE to ignore the NFC wake signal and we have a connection in power save mode."/>
+   <FIELDDEF NAME="Pulsed_HOST_WAKE" DATATYPE="byte" DEFAULT="0" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="Set_Sleepmode_Param_Resp" ID="0x4F1B" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="NCI Return Status" />
+ </STRUCTDEF>
+
+
+
+ <STRUCTDEF NAME="NCI_Get_Sleepmode_CMD" ID="0x2F1C" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NCI_Get_Sleepmode_RSP" ID="0x4F1C" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST" COMMENT="Command to get sleep mode parameters">
+   <FIELDDEF NAME="Sleep_Mode" DATATYPE="byte" COMMENT="Set TRUE to enable sleep mode."/>
+   <FIELDDEF NAME="Idle_Threshold_Host" DATATYPE="byte"/>
+   <FIELDDEF NAME="Idle_Threshold_HC" DATATYPE="byte" />
+   <FIELDDEF NAME="HOST_WAKE_Active_Mode" DATATYPE="byte"/>
+   <FIELDDEF NAME="Combine_Sleep_Mode_And_LPM" DATATYPE="byte" COMMENT=" Set FALSE to ignore the NFC wake signal and we have a connection in power save mode."/>
+   <FIELDDEF NAME="Pulsed_HOST_WAKE" DATATYPE="byte"/>
+ </STRUCTDEF>
+
+
+
+
+<!-- NCI PROP XTAL INDEX -->
+ <STRUCTDEF NAME="XTAL_INDEX_CMD" ID="0x2F1D" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="XTAL download command">
+   <FIELDDEF NAME="xtalFreqIdx" DATATYPE="byte" DEFAULT="5" COMMENT="XTAL Index"/>
+   <FIELDDEF NAME="xtalFreq" DATATYPE="uint16" DEFAULT="0" COMMENT="XTAL Frequency in KHz unit"/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="XTAL_INDEX_RSP" ID="0x4F1D" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to XTAL_INDEX_CMD">
+  <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+</STRUCTDEF>
+
+ <STRUCTDEF NAME="SWP_LOG_NTF" ID="0x6F20" TEMPLATE="NCI_HCINETWK_CMD"  KIND="DEVICE2HOST" COMMENT="NTF to report the SWP Frame logging">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Byte length, include 1 control byte, 2 OFFSET bytes, and DATA. "/>
+    <FIELDDEF NAME="isTx"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="1" COMMENT="isTx"/>
+    <FIELDDEF NAME="Fixed"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="9"  BITLENGTH="1" COMMENT="RFU"/>
+    <FIELDDEF NAME="RFU"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="10"  BITLENGTH="2" COMMENT="RFU"/>
+    <FIELDDEF NAME="swpIdx"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="12"  BITLENGTH="4" COMMENT="swpIdx"/>
+    <FIELDDEF NAME="TimeStamp"  DATATYPE="uint32" DEFAULT="0" COMMENT="Offset" />
+   <FIELDDEF NAME="Data"    DATATYPE="byte"  ARRAYSIZE="MSG_Length-5"    COMMENT="Logged Frame Data(Max 24 bytes)"/>
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="FELICA_LOG_NTF" ID="0x633F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" NTF to report the Felica SPI Frame logging">
+   <FIELDDEF NAME="isTx"    DATATYPE="byte"  COMMENT="If 1 it is a Tx Frame; if 0 it is a RX Frame"/>
+  <FIELDDEF NAME="TimeStamp" DATATYPE="uint32"  COMMENT="FW Time Stamp. It is a down Counter"/>
+   <FIELDDEF NAME="Data"    DATATYPE="byte"  ARRAYSIZE="TOEND"	COMMENT="Logged Frame Data(Max 24 bytes)"/>
+</STRUCTDEF>
+
+<!-- NCI PROP SET EE READER TOKEN -->
+ <STRUCTDEF NAME="SET_EE_RDR_TOKEN_CMD" ID="0x2F1E" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to grant EE reader mode token">
+    <FIELDDEF NAME="TargetId"  DATATYPE="byte" DEFAULT="0xF3" COMMENT="NFCEE Target ID"  />
+    <FIELDDEF NAME="OperStatus"  DATATYPE="byte"  DEFAULT="0x1" COMMENT="Enable/Disable Operating Status"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SET_EE_RDR_TOKEN_RSP" ID="0x4F1E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the SET_EE_RDR_TOKEN_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="DEBUG_CTRL_CMD" ID="0x2F1F" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Enable/disable chip debug features">
+    <FIELDDEF NAME="DbgCtrl"  DATATYPE="byte" COMMENT="0x00=NCI_DBGCTRL_ESEMIRROR_DISABLE, 0x01=NCI_DBGCTRL_ESEMIRROR_ENABLE"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="DEBUG_CTRL_RSP" ID="0x4F1F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to DEBUG_CTRL_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+</STRUCTDEF>
+
+<STRUCTDEF NAME="SET_TINT_MODE_CMD" ID="0x2F21" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="Enable TINT HW debug mode in FW">
+  <FIELDDEF NAME="enable"  DATATYPE="byte"  COMMENT="If non zero will enable TINT mode; else will disable it"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="SET_TINT_MODE_RSP" ID="0x4F21" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SET_TINT_MODE_CMD">
+  <FIELDDEF NAME="status"  DATATYPE="byte"  COMMENT="NCI return status"/>
+</STRUCTDEF>
+
+<!-- NCI PROP LPTD NOTIFICATION -->
+<STRUCTDEF NAME="LPTD_NTF" ID="0x6F25" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="SWK LPTD False Detect threshold has been exceeded">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+</STRUCTDEF>
+
+<!-- NCI PROP LPTD DIAGNOSTICS NTF -->
+<STRUCTDEF NAME="LPTD_DIAG_NTF" ID="0x6F32" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="LPTD Diagnostics Notification">
+    <FIELDDEF NAME="Type"  DATATYPE="byte" COMMENT="Type of diagnostics information" />
+
+      <!-- Type: 0 => Calibration changed (or Reference IQ sampled) -->
+      <FIELDDEF NAME="I_Ref" DATATYPE="int16" COMMENT="Reference I Value" PRESENT_IF="(Type == 0)" />
+      <FIELDDEF NAME="Q_Ref" DATATYPE="int16" COMMENT="Reference Q Value" PRESENT_IF="(Type == 0)" />
+      <FIELDDEF NAME="VectorMetric" DATATYPE="uint32" COMMENT="Power Metric" PRESENT_IF="(Type == 0)" />
+      <FIELDDEF NAME="PowerMetric" DATATYPE="uint32" COMMENT="Vector Metric" PRESENT_IF="(Type == 0)" />
+
+      <!-- Type: 1 => Sniff poll data -->
+      <FIELDDEF NAME="I" DATATYPE="int16" COMMENT="Decimated I Value" PRESENT_IF="(Type == 1)" />
+      <FIELDDEF NAME="Q" DATATYPE="int16" COMMENT="Decimated Q Value" PRESENT_IF="(Type == 1)" />
+      <FIELDDEF NAME="VectorMetric" DATATYPE="uint32" COMMENT="Power Metric" PRESENT_IF="(Type == 1)" />
+      <FIELDDEF NAME="PowerMetric" DATATYPE="uint32" COMMENT="Vector Metric" PRESENT_IF="(Type == 1)" />
+      <FIELDDEF NAME="DetectionStatus" DATATYPE="byte" COMMENT="Detection Status" PRESENT_IF="(Type == 1)" />
+
+      <!-- Type: 2 => AE LPTD Diagnostic -->
+      <FIELDDEF NAME="falseDetectCnt"  DATATYPE="uint16" PRESENT_IF="(Type == 2)"      COMMENT="False detects since discovery start"/>
+      <FIELDDEF NAME="totalCnt"        DATATYPE="uint16" PRESENT_IF="(Type == 2)"      COMMENT="LPTD Scheduler count"/>
+
+</STRUCTDEF>
+
+<!-- NCI PROP ACCESS APP -->
+ <STRUCTDEF NAME="ACCESS_APP_CMD" ID="0x2F22" TEMPLATE="NCI_APP_CMD"  KIND="HOST2DEVICE" COMMENT="Historical message for NFCC information backup. Obsolete now">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTES"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Byte length, include 1 control byte, 2 OFFSET bytes, and DATA. "/>
+    <FIELDDEF NAME="APPType"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTES"  LEFTBIT="8"  BITLENGTH="4" COMMENT="Access type"/>
+    <FIELDDEF NAME="APPDest"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTES"  LEFTBIT="12"  BITLENGTH="3" COMMENT="Destination"/>
+    <FIELDDEF NAME="APPOper"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTES"  LEFTBIT="15"  BITLENGTH="1" COMMENT="Operation"/>
+    <FIELDDEF NAME="OFFSET"  DATATYPE="uint16" DEFAULT="0" COMMENT="Offset" />
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-3" PRESENT_IF="(MSG_Length > 3)" COMMENT="Data"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="ACCESS_APP_RSP" ID="0x4F22" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="ACCESS_APP_NTF" ID="0x6F22" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Historical message for NFCC information backup. Obsolete now">
+    <FIELDDEF NAME="Control"  DATATYPE="byte"   COMMENT="Control byte"/>
+    <FIELDDEF NAME="OFFSET"  DATATYPE="uint16"   COMMENT="Offset"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="TOEND" COMMENT="Data" />
+ </STRUCTDEF>
+
+
+ <!-- NCI Disable Secure Mode -->
+ <STRUCTDEF NAME="SET_SECURE_MODE_CMD" ID="0x2F23" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to enable/disable secure mode in NFCC">
+   <FIELDDEF NAME="Enable_Secure_Mode" DATATYPE="byte" DEFAULT="0" COMMENT="If non zero will enable secure mode in FW; else will disable it" />
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="SET_SECURE_MODE_RSP" ID="0x4F23" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SET_SECURE_MODE_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI PROP SS AUTH START -->
+ <STRUCTDEF NAME="SS_AUTH_START_CMD" ID="0x2F24" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="To enable SS tag authentication">
+   <FIELDDEF NAME="poll_param_Z"  DATATYPE="byte"  COMMENT="Poll configure Z"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SS_AUTH_START_RSP" ID="0x4F24" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SS_AUTH_START_CMD">
+   <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+ <!-- NCI PROP SS AUTH END -->
+ <STRUCTDEF NAME="SS_AUTH_END_CMD" ID="0x2F26" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE" COMMENT="To end SS tag authentication">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="SS_AUTH_END_RSP" ID="0x4F26" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SS_AUTH_END_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="GET_TEMPERATURE_CMD" ID="0x2F27" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Get current die temperature">
+ </STRUCTDEF>
+
+<STRUCTDEF NAME="GET_TEMPERATURE_RSP" ID="0x4F27" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Get current die temperature">
+  <FIELDDEF NAME="temperature"  DATATYPE="int32" COMMENT="Temperature" />
+</STRUCTDEF>
+
+
+ <!-- NCI PROP EEPROM RW -->
+ <STRUCTDEF NAME="NVM_RW_CMD" ID="0x2F29" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to perform NVM read/write">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="0x00=Read data from NVM; 0x01= Write data to NVM"  />
+    <FIELDDEF NAME="Offset"  DATATYPE="short" COMMENT="Address on the NVM for read/write" />
+    <FIELDDEF NAME="Length"  DATATYPE="byte"  DEFAULT="0x1" COMMENT="Number of bytes to read/write"/>
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NVM_RW_RSP" ID="0x4F29" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the NVM_RW_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NVM_RW_NTF" ID="0x6F29" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="NVM read/write notification">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="0x00=Read data from NVM; 0x01= Write data to NVM"  />
+    <FIELDDEF NAME="Offset"  DATATYPE="short" COMMENT="Address on the NVM for read/write" />
+    <FIELDDEF NAME="Length"  DATATYPE="byte" COMMENT="Number of bytes read/written"  />
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI PROP DH CONFIG DATA RW -->
+ <STRUCTDEF NAME="CFG_DATA_RW_CMD" ID="0x2F28" TEMPLATE="NCI_HCINETWK_CMD" KIND="HOST2DEVICE" COMMENT="Command to read/write config data saved in NVM">
+
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits"  DEFAULT="1" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+    <FIELDDEF NAME="type"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="7" COMMENT="command or ntf type: 0-get info, 1-read, 2-write"/>
+    <FIELDDEF NAME="more"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="15"  BITLENGTH="1" COMMENT="Assert if this if more data to come"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="data read or to be written."/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CFG_DATA_RW_RSP" ID="0x4F28" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the config data read/write command">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CFG_DATA_RW_NTF" ID="0x6F28" TEMPLATE="NCI_HCINETWK_CMD" KIND="DEVICE2HOST" COMMENT="Command to read/write config data saved in NVM">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="0"  BITLENGTH="8" COMMENT="Message length, include the control byte and data."/>
+    <FIELDDEF NAME="type"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="8"  BITLENGTH="7" COMMENT="command or ntf type: 0-get info, 1-read, 2-write"/>
+    <FIELDDEF NAME="more"  DATATYPE="bits" BITSOURCEREF="CONTROLBYTE"  LEFTBIT="15"  BITLENGTH="1" COMMENT="Assert if this if more data to come"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="data read or to be written."/>
+ </STRUCTDEF>
+
+
+
+
+ <!-- NCI PROP GET CLF REGISTERS -->
+ <STRUCTDEF NAME="GET_CLF_REGISTERS_CMD" ID="0x2F2A" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to dump out the contents of all the CLF registers">
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="GET_CLF_REGISTERS_RSP" ID="0x4F2A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the GET_CLF_REGISTERS_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="GET_CLF_REGISTERS_NTF" ID="0x6F2A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="The CLF register values dump notification">
+    <FIELDDEF NAME="CLFLastNTF"  DATATYPE="uint8" COMMENT="Value=0x0 indicates this is not the last segment; Value=0x1 indicates this is the last segment"  />
+    <FIELDDEF NAME="CLFRegOffset"  DATATYPE="uint16" COMMENT="Offset of the CLF registers w.r.t the base register address (nfc_ip_adr_base)"  />
+    <FIELDDEF NAME="CLFRegVal"  DATATYPE="byte"  ARRAYSIZE="TOEND" COMMENT="The CLF register values"/>
+ </STRUCTDEF>
+
+<!-- NCI PROP RF TEST -->
+<STRUCTDEF NAME="NFC_RF_TEST_CMD" ID="0x2F2B" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command for: (a) Toggle the RF field ON/OFF  (b) As a reader, to Tx any frame for a given tech/protocol (c) To dump-out the CLF and other configuration registers">
+   <FIELDDEF NAME="enable" DATATYPE="byte" DEFAULT="0" COMMENT="0x0 - the VSC is disbaled, 0x1 - the VSC is enabled"/>
+   <FIELDDEF NAME="opcode" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(enable == 0x01)" COMMENT="0x01=RFTEST_CMD_TOGGLEFIELD; 0x02=RFTEST_CMD_TX; 0x03=RFTEST_CMD_SENDCLFREG "/>
+   <FIELDDEF NAME="size" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(enable == 0x01)" COMMENT="The size of the array to follow based on the opcode type"/>
+   <FIELDDEF NAME="buffer" DATATYPE="byte" ARRAYSIZE="size" PRESENT_IF="(size > 0)" COMMENT="The array parameters vary based on the opcode type"/>
+</STRUCTDEF>
+
+ <STRUCTDEF NAME="NFC_RF_TEST_RSP" ID="0x4F2B" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the NFC_RF_TEST_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+<!-- NCI PROP DEUBG PRINT -->
+ <STRUCTDEF NAME="DEBUG_PRINT_NTF" ID="0x6F2C" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="NTF debug prints">
+   <FIELDDEF NAME="buffer"  DATATYPE="string" LENGTH="TOEND" COMMENT="NTF debug buffer data"/>
+ </STRUCTDEF>
+
+<!-- NCI PROP SPD GET VERION -->
+<STRUCTDEF NAME="NFC_SPD_GET_VER_CMD" ID="0x2F2D" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to get the secure patch download version details">
+</STRUCTDEF>
+
+ <STRUCTDEF NAME="NFC_SPD_GET_VER_RSP" ID="0x4F2D" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the NFC_SPD_GET_VER_CMD">
+   <FIELDDEF NAME="ProjectId" DATATYPE="uint16" COMMENT="Customer specific project ID" />
+   <FIELDDEF NAME="RFU" DATATYPE="byte" COMMENT="Reserved" />
+   <FIELDDEF NAME="chipVerLen"  DATATYPE="byte" COMMENT="Length of chip version name" />
+   <FIELDDEF NAME="chipVer"  DATATYPE="string"  LENGTH="16" COMMENT="Chip version name"/>
+   <FIELDDEF NAME="MajorVer"  DATATYPE="uint16" COMMENT="Major version of the patch" />
+   <FIELDDEF NAME="MinorVer"  DATATYPE="uint16" COMMENT="Minor version of the patch" />
+   <FIELDDEF NAME="NVMMaxSize"  DATATYPE="uint32" COMMENT="Maximum size of the NVM" />
+   <FIELDDEF NAME="PatchCodeMaxSize"  DATATYPE="uint32" COMMENT="Maximum size of the patch code" />
+   <FIELDDEF NAME="PatchCodeSize" DATATYPE="uint32" COMMENT="Full power mode - patch code size" />
+   <FIELDDEF NAME="PatchCodeHasBadCRC" DATATYPE="byte" COMMENT="Bad CRC check for Full power mode patch code" />
+   <FIELDDEF NAME="NVMType" DATATYPE="byte" COMMENT="0x00=Device RAM; 0x01=EEPROM; 0x02=UICC" />
+
+ </STRUCTDEF>
+
+
+<!-- NCI PROP SPD DOWNLOAD -->
+
+  <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_HDR_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch header download">
+    <FIELDDEF NAME="MSG_Length"		DATATYPE="byte" 	DEFAULT="142" READONLY="1" COMMENT="Length of the header message"/>
+    <FIELDDEF NAME="Type"       	DATATYPE="byte" 	DEFAULT="0" READONLY="1" COMMENT="Message Type - Header" />
+    <FIELDDEF NAME="PowerLevel"  	DATATYPE="uint8" COMMENT="Power level"/>
+    <FIELDDEF NAME="INIT_Addr" 		DATATYPE="uint32" COMMENT="Init code address"/>
+    <FIELDDEF NAME="SRAM_Addr" 		DATATYPE="uint32" COMMENT="Sram code address"/>
+    <FIELDDEF NAME="PatchBrk_Addr" 	DATATYPE="uint32" COMMENT="Patch breakout start address"/>
+    <FIELDDEF NAME="PatchRpl_Addr"  DATATYPE="uint32" COMMENT="Patch replacement start address"/>
+    <FIELDDEF NAME="Extra_Addr"  	DATATYPE="uint32" COMMENT="Extra (rfu) start address"/>
+    <FIELDDEF NAME="ProjectId"  	DATATYPE="uint16" COMMENT="Project ID"/>
+    <FIELDDEF NAME="RFU"  			DATATYPE="byte" COMMENT="Reserved"/>
+    <FIELDDEF NAME="ChipLen"  		DATATYPE="uint8" 	DEFAULT="7" READONLY="1" COMMENT="Chip version length"/>
+    <FIELDDEF NAME="ChipNum"  		DATATYPE="string" 	LENGTH="16" DEFAULT="20791B3         " COMMENT="Chip number"/>
+    <FIELDDEF NAME="MajorVer"  		DATATYPE="uint16" COMMENT="Major version of the NFCC FW"/>
+    <FIELDDEF NAME="MinorVer"  		DATATYPE="uint16" COMMENT="Minor version of the NFCC FW"/>
+    <FIELDDEF NAME="Hash"  		    DATATYPE="uint8" ARRAYSIZE="32" COMMENT="Major version of the NFCC FW"/>
+    <FIELDDEF NAME="Signature"  	DATATYPE="uint8" ARRAYSIZE="64" COMMENT="Minor version of the NFCC FW"/>
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_INIT_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch data download for INIT">
+    <FIELDDEF NAME="MSG_Length"  	DATATYPE="byte" DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"  			DATATYPE="byte" DEFAULT="1" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch code for INIT"/>
+    <FIELDDEF NAME="DATA"  			DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+   <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_SRAM_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch data download for SRAM">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"  DATATYPE="byte" DEFAULT="2" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch code for SRAM"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+   <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_PATCHBRK_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch data download for Patch Brk">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"  DATATYPE="byte" DEFAULT="3" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch code for Patch Brk"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+   <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_PATCHRPL_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch data download for Patch Rpl">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"  DATATYPE="byte" DEFAULT="4" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch code for Patch Rpl"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+   <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_EXTRA_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch data download for Extra">
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte" DEFAULT="1" COMMENT="Length of the data message"/>
+    <FIELDDEF NAME="Type"  DATATYPE="byte" DEFAULT="5" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch code forExtra"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+  <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_SIG_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch signature download">
+    <FIELDDEF NAME="MSG_Length"  	DATATYPE="byte" DEFAULT="65" READONLY="1" COMMENT="Length of the secured patch signature"/>
+    <FIELDDEF NAME="Type"  			DATATYPE="byte" DEFAULT="6" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch signature"/>
+    <FIELDDEF NAME="DATA"  			DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding signature bytes"/>
+ </STRUCTDEF>
+
+   <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_SIGCHEK_DATA_CMD" ID="0x2F2E" TEMPLATE="NCI_SPD_CMD" KIND="HOST2DEVICE" COMMENT="Command to handle the secure patch signature download check">
+    <FIELDDEF NAME="MSG_Length"  	DATATYPE="byte" DEFAULT="1" COMMENT="Length of the signature check data message"/>
+    <FIELDDEF NAME="Type"  			DATATYPE="byte" DEFAULT="7" READONLY="1" PRESENT_IF="(MSG_Length > 0)" COMMENT="Message Type - Secured Patch signature check"/>
+    <FIELDDEF NAME="DATA"  			DATATYPE="byte" ARRAYSIZE="MSG_Length-1" PRESENT_IF="(MSG_Length > 1)" COMMENT="Corresponding data bytes"/>
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_RSP" ID="0x4F2E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the Secure patch download command">
+   <FIELDDEF NAME="status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="NFC_SPD_DOWNLOAD_NTF" ID="0x6F2E" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Notification to the Secure patch download command">
+   <FIELDDEF NAME="status"  DATATYPE="byte" COMMENT="NCI notification status" />
+ </STRUCTDEF>
+
+<!-- NCI SPD FORMAT NVM -->
+<STRUCTDEF NAME="NFC_SPD_FORMAT_NVM_CMD" ID="0x2F2F" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to format the NVM contents">
+   <FIELDDEF NAME="data" DATATYPE="byte" DEFAULT="0" COMMENT="Content is formatted with this data byte"/>
+</STRUCTDEF>
+
+ <STRUCTDEF NAME="NFC_SPD_FORMAT_NVM_RSP" ID="0x4F2F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the NFC_SPD_FORMAT_NVM_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status" />
+ </STRUCTDEF>
+
+<!-- NCI PROP SWP BIST-->
+<STRUCTDEF NAME="NFC_SWP_BIST_CMD" ID="0x2F31" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="SWP BIST TEST COMMAND which checks UICC during manufacture">
+  <FIELDDEF NAME="TargetHandle"  DATATYPE="byte" COMMENT="Target handle for UICC0 or UICC1" />
+  <FIELDDEF NAME="TestType"  DATATYPE="uint8" DEFAULT="0x0F" COMMENT="eSE test type: check sum, read/write "/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="NFC_SWP_BIST_RSP" ID="0x4F31" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="SWP BIST TEST RESPONSE">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="SWP BIST TEST status"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="NFC_SWP_BIST_NTF" ID="0x6F31" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="SWP BIST TEST NTF">
+  <FIELDDEF NAME="TestStatus"  DATATYPE="byte" COMMENT="SWP BIST TEST status"/>
+  <FIELDDEF NAME="Results"  	DATATYPE="byte" ARRAYSIZE="4" COMMENT="SWP BIST TEST results for four test types. 0x5A is pass"/>
+  <FIELDDEF NAME="UID"  	       DATATYPE="byte" ARRAYSIZE="10" COMMENT="SWP BIST TEST UID"/>
+</STRUCTDEF>
+
+<!-- NCI PROP I2C_REQ POLARITY-->
+<STRUCTDEF NAME="NFC_I2C_REQ_POLARITY_CMD" ID="0x2F33" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="I2C_REQ pin polarity change command">
+  <FIELDDEF NAME="Polarity"  DATATYPE="uint8" COMMENT="I2C_REQ pin polarity, 1 is default, 0 is reverse"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="NFC_I2C_REQ_POLARITY_RSP" ID="0x4F33" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="I2C_REQ pin polarity change response">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="status"/>
+</STRUCTDEF>
+
+
+<!-- NCI PROP OTP COMMAND -->
+<STRUCTDEF NAME="ACCESS_OTP_CMD" ID="0x2F35" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Access OTP Command">
+    <FIELDDEF NAME="Type" DATATYPE="byte" COMMENT="0 - read, 1 - write, 2 - init, 3 - wenable, 4 - wdisable, 5 - shutdown, 6 - write_dbgmajor, 7 - read_config, 8 - write_config, 9 - Disable Olympic test mode, 10 - Disable Mifare mode,11 - Read otp word"/>
+    <FIELDDEF NAME="Word_Addr"  DATATYPE="uint16" PRESENT_IF="(Type == 0) || (Type == 1)" COMMENT=" OTP Address" />
+    <FIELDDEF NAME="Word_Num"  DATATYPE="uint8" PRESENT_IF="(Type == 11)" COMMENT=" OTP word number to read" />
+    <FIELDDEF NAME="Word_Data"  DATATYPE="uint32" PRESENT_IF="(Type == 1)" COMMENT="Access Data in 32-bit" />
+    <FIELDDEF NAME="Data_Length" DATATYPE="uint8" PRESENT_IF="(Type == 8)" DEFAULT="0x1" COMMENT="Total Length of Data"/>
+    <FIELDDEF NAME="Data"        DATATYPE="byte"   PRESENT_IF="(Type == 8)" ARRAYSIZE="Data_Length" COMMENT="Data of type 8 - write_config"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="ACCESS_OTP_RSP" ID="0x4F35" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Access OTP Response">
+    <FIELDDEF NAME="Status"  DATATYPE="uint8" />
+    <FIELDDEF NAME="Type" DATATYPE="byte" COMMENT="0 - read, 1 - write, 2 - init, 3 - wenable, 4 - wdisable, 5 - shutdown, 6 - write_dbgmajor, 7 - read_config, 8 - write_config, 9 - Disable Olympic test mode, 10 - Disable Mifare mode,11 - Read otp word"/>
+    <FIELDDEF NAME="HW_Status"  DATATYPE="uint16" COMMENT="OTP Address" />
+    <FIELDDEF NAME="Word_Data"  DATATYPE="uint32" COMMENT="Access Data in 32-bit"  />
+    <FIELDDEF NAME="Data_Length"  DATATYPE="uint8" PRESENT_IF="(Type == 7)" COMMENT="Total Length of Data"/>
+    <FIELDDEF NAME="Data"         DATATYPE="byte" PRESENT_IF="(Type == 7)" ARRAYSIZE="TOEND" COMMENT="Data of type 7 - read_config"/>
+</STRUCTDEF>
+
+ <!-- NCI PROP UNIO RW -->
+ <STRUCTDEF NAME="UNIO_RW_CMD" ID="0x2F36" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to perform UNIO read/write">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="UNIO Cmd Opcodes"  />
+    <FIELDDEF NAME="Offset"  DATATYPE="short" COMMENT="Address on the UNIO for read/write" />
+    <FIELDDEF NAME="Length"  DATATYPE="byte"  DEFAULT="0x1" COMMENT="Number of bytes to read/write"/>
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="UNIO_RW_RSP" ID="0x4F36" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the UNIO_RW_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="UNIO_RW_NTF" ID="0x6F36" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="UNIO read/write notification">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="UNIO Cmd Opcodes"  />
+    <FIELDDEF NAME="Offset"  DATATYPE="short" COMMENT="Address on the UNIO for read/write" />
+    <FIELDDEF NAME="Length"  DATATYPE="byte" COMMENT="Number of bytes read/written"  />
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+
+ <!-- NCI PROP NFC OFF MODE -->
+ <STRUCTDEF NAME="SET_NFC_OFF_CMD" ID="0x2F38" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to set NFC OFF Mode">
+   <FIELDDEF NAME="setNfcOff" DATATYPE="byte" DEFAULT="1" COMMENT="If set to one will set the NFC off"/>
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="SET_NFC_OFF_RSP" ID="0x4F38" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to SET_NFC_OFF_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+ <!-- NCI PROP DEBUG_FRAMEWORK -->
+ <STRUCTDEF NAME="DEBUG_FRAMEWORK_CMD" ID="0x2F3B" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+  <FIELDDEF NAME="dbfw_cmd"  DATATYPE="uint8" />
+  <FIELDDEF NAME="moduleMask"  DATATYPE="uint32" DEFAULT="0x7FFFFFFF" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="push_timeout_in_ms"  DATATYPE="uint16" DEFAULT="100" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="trace_watermark"  DATATYPE="uint16" DEFAULT="4" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="trace_level"  DATATYPE="uint8" DEFAULT="0" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="trace_mode"  DATATYPE="uint8" DEFAULT="2" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="trace_flow"  DATATYPE="uint8" DEFAULT="1" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="tracedump_output_channel_selection" DEFAULT="5" DATATYPE="uint8" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="coredump_output_channel_selection" DEFAULT="0" DATATYPE="uint8" PRESENT_IF="(dbfw_cmd == 0)"/>
+  <FIELDDEF NAME="dbguart_pad" DEFAULT="1" DATATYPE="uint8" PRESENT_IF="(dbfw_cmd == 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DEBUG_FRAMEWORK_RSP" ID="0x4F3B" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="NCI Return Status"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DEBUG_FRAMEWORK_DUMP" ID="0x6F3B" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST">
+    <FIELDDEF NAME="dump_type"  DATATYPE="uint8" />
+    <FIELDDEF NAME="data"  DATATYPE="uint8" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+ <!-- NCI PROP SS START AUTH -->
+ <STRUCTDEF NAME="CPU_MEM_PROFILE_CMD" ID="0x2F3C" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="access_type"  DATATYPE="uint8" COMMENT=" 1, one time; 2, poll periodically; 3, both; 4, reset data" />
+    <FIELDDEF NAME="profile_type"  DATATYPE="uint8" COMMENT="0, disable; 1, cpu load; 2, mem, 3 both " />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CPU_MEM_PROFILE_RSP" ID="0x4F3C" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="NCI Return Status" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="CPU_MEM_PROFILE_NTF" ID="0x6F3C" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="profileBaseCPUSpeed"  DATATYPE="uint32" />
+  <FIELDDEF NAME="cpuLoadoutputCounter"  DATATYPE="uint32" />
+  <FIELDDEF NAME="cpuLoadoutputCounterMax"  DATATYPE="uint32" />
+  <FIELDDEF NAME="cpuLoadMax"  DATATYPE="uint8" />
+  <FIELDDEF NAME="cpuLoadMaxTimeStamp"  DATATYPE="uint32" />
+  <FIELDDEF NAME="cpuLoad"  DATATYPE="uint8" />
+  <FIELDDEF NAME="cpuLoadTimeStamp"  DATATYPE="uint32" />
+  <FIELDDEF NAME="smallMemBlockFreeSizeMin"  DATATYPE="uint8" />
+  <FIELDDEF NAME="smallMemBlockSizeFreeMinTimeStamp"  DATATYPE="uint32" />
+  <FIELDDEF NAME="smallMemBlockFreeSize"  DATATYPE="uint8" />
+  <FIELDDEF NAME="bigMemBlockFreeSizeMin"  DATATYPE="uint8" />
+  <FIELDDEF NAME="bigMemBlockFreeSizeMinTimeStamp"  DATATYPE="uint32" />
+  <FIELDDEF NAME="bigMemBlockFreeSize"  DATATYPE="uint8" />
+  <FIELDDEF NAME="hugeMemBlockFreeSizeMin"  DATATYPE="uint8" />
+  <FIELDDEF NAME="hugeMemBlockFreeSizeMinTimeStamp"  DATATYPE="uint32" />
+  <FIELDDEF NAME="hugeMemBlockFreeSize"  DATATYPE="uint8" />
+  <FIELDDEF NAME="timeStamp"  DATATYPE="uint32" />
+ </STRUCTDEF>
+
+ <!-- NCI PROP SS END AUTH -->
+ <STRUCTDEF NAME="CPU_MASS_PROFILE_NTF" ID="0x6F3D" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="CPU_LOAD"  	       DATATYPE="byte" ARRAYSIZE="200" COMMENT="CPU load, timestamp x 20"/>
+ </STRUCTDEF>
+
+
+ <STRUCTDEF NAME="TAG_SENS_TEST_CFG_CMD" ID="0x2F3E" TEMPLATE="NCI_CMD_NOTIF"  KIND="HOST2DEVICE">
+  <FIELDDEF NAME="SequenceNum"  DATATYPE="uint16" />
+  <FIELDDEF NAME="FrameNum"  DATATYPE="uint16" />
+  <FIELDDEF NAME="FrameSize"  DATATYPE="uint16" />
+  <FIELDDEF NAME="DataInterval"  DATATYPE="uint16" />
+
+  <FIELDDEF NAME="NumConfigs"  DATATYPE="byte" DEFAULT="1" />
+
+  <FIELDDEF NAME="Parameter_ID"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 0)" />
+  <FIELDDEF NAME="Parameter_Len" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 0)" />
+  <FIELDDEF NAME="Parameter_Val" DATATYPE="byte" ARRAYSIZE="Parameter_Len" PRESENT_IF="(Parameter_Len > 0)" />
+
+  <FIELDDEF NAME="Parameter_ID_1"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 1)" />
+  <FIELDDEF NAME="Parameter_Len_1" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 1)" />
+  <FIELDDEF NAME="Parameter_Val_1" DATATYPE="byte" ARRAYSIZE="Parameter_Len_1" PRESENT_IF="(Parameter_Len_1 > 0)" />
+
+  <FIELDDEF NAME="Parameter_ID_2"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 2)" />
+  <FIELDDEF NAME="Parameter_Len_2" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 2)" />
+  <FIELDDEF NAME="Parameter_Val_2" DATATYPE="byte" ARRAYSIZE="Parameter_Len_2" PRESENT_IF="(Parameter_Len_2 > 0)" />
+
+  <FIELDDEF NAME="Parameter_ID_3"  DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 3)" />
+  <FIELDDEF NAME="Parameter_Len_3" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(NumConfigs > 3)" />
+  <FIELDDEF NAME="Parameter_Val_3" DATATYPE="byte" ARRAYSIZE="Parameter_Len_3" PRESENT_IF="(Parameter_Len_3 > 0)" />
+ </STRUCTDEF>
+
+ <!-- NCI PROP TAG SENSITIVITY TEST -->
+ <STRUCTDEF NAME="TAG_SENS_TEST_CFG_RSP" ID="0x4F3E" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="Status"  DATATYPE="uint8" COMMENT="NCI Return Status" />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="TAG_SENS_TEST_RESULTS_NTF" ID="0x6F3E" TEMPLATE="NCI_CMD_NOTIF"  KIND="DEVICE2HOST">
+  <FIELDDEF NAME="State"  DATATYPE="uint8" COMMENT="NCI Return State" />
+  <FIELDDEF NAME="RFTech"  DATATYPE="uint8" />
+  <FIELDDEF NAME="ManuID"  DATATYPE="uint8" />
+  <FIELDDEF NAME="TesterVer"  DATATYPE="uint16" />
+  <FIELDDEF NAME="SequenceNum"  DATATYPE="uint16" />
+  <FIELDDEF NAME="FrameNum"  DATATYPE="uint16" />
+  <FIELDDEF NAME="FrameSize"  DATATYPE="uint16" />
+  <FIELDDEF NAME="ResultsLen"  DATATYPE="uint16" />
+  <FIELDDEF NAME="Results"  DATATYPE="uint8" ARRAYSIZE="TOEND" />
+ </STRUCTDEF>
+
+
+<!-- ******************************************** NFC THROUGHPUT TEST MESSAGES ******************************************** -->
+
+<STRUCTDEF NAME="DATA_MSG_THROUGHPUT" ID="0x0" TEMPLATE="NCI_DATA_SEND"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1" DEFAULT="1"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="CREDIT"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="10"  BITLENGTH="6"/>
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length" PRESENT_IF="(MSG_Length > 0)"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="DATA_MSG_THROUGHPUT_LAST" ID="0x0" TEMPLATE="NCI_DATA_SEND"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="PBF"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="3"  BITLENGTH="1" DEFAULT="0"/>
+    <FIELDDEF NAME="CONN_ID"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="4"  BITLENGTH="4"/>
+    <FIELDDEF NAME="CREDIT"  DATATYPE="bits" BITSOURCEREF="IDBYTES"  LEFTBIT="10"  BITLENGTH="6"/>
+    <FIELDDEF NAME="MSG_Length"  DATATYPE="byte"/>
+    <FIELDDEF NAME="DATA"  DATATYPE="byte" ARRAYSIZE="MSG_Length" PRESENT_IF="(MSG_Length > 0)"/>
+ </STRUCTDEF>
+
+
+<STRUCTDEF NAME="GET_IQ_DATA_NTF" ID="0x4F37" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" NTF to report the requested IQ data">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"  COMMENT="NCI return Status"/>
+   <FIELDDEF NAME="DATA"  DATATYPE="uint32"  ARRAYSIZE="TOEND" COMMENT=" IQ data"	/>
+</STRUCTDEF>
+
+
+<!-- NCI PROP FELICA SPI RW -->
+ <STRUCTDEF NAME="FELICA_SPI_RW_CMD" ID="0x2F3F" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Command to perform Felica SPI read/write">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="Felica Cmd Opcodes"  />
+    <FIELDDEF NAME="Length"  DATATYPE="byte"  DEFAULT="0x1" COMMENT="Number of bytes to read/write"/>
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="FELICA_SPI_RW_RSP" ID="0x4F3F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to the FELICA_SPI_RW_CMD">
+    <FIELDDEF NAME="Status"  DATATYPE="byte" COMMENT="NCI return status"  />
+ </STRUCTDEF>
+
+ <STRUCTDEF NAME="FELICA_SPI_RW_NTF" ID="0x6F3F" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="FELICA SPI read/write notification">
+    <FIELDDEF NAME="Opcode"  DATATYPE="byte" COMMENT="Felica Cmd Opcodes"  />
+    <FIELDDEF NAME="Length"  DATATYPE="byte" COMMENT="Number of bytes read/written"  />
+    <FIELDDEF NAME="Data" DATATYPE="byte" ARRAYSIZE="Length" PRESENT_IF="(Length > 0)" COMMENT="Data bytes"/>
+ </STRUCTDEF>
+
+<!-- NCI PROP MFW TEST -->
+<STRUCTDEF NAME="MFW_TEST_CMD" ID="0x2F3A" TEMPLATE="NCI_CMD_NOTIF" KIND="HOST2DEVICE" COMMENT="Manufacturing FW test">
+    <FIELDDEF NAME="FuncCode" DATATYPE="byte" COMMENT="Code to select testing function"/>
+    <FIELDDEF NAME="GpioLevel" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(FuncCode == 0)" COMMENT="Input parameter for Toggle GPIO"/>
+    <FIELDDEF NAME="RFFieldInfo" DATATYPE="byte" DEFAULT="1" PRESENT_IF="(FuncCode == 1)" COMMENT="Input parameter for RF_Field_ON"/>
+    <FIELDDEF NAME="HostId" DATATYPE="byte" DEFAULT="2" PRESENT_IF="(FuncCode == 2)" COMMENT="Input parameter for GET_SESSIONID"/>
+    <FIELDDEF NAME="TypeRate" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(FuncCode == 3)" COMMENT="Input parameter for Fix Pattern Trans"/>
+    <FIELDDEF NAME="Pattern" DATATYPE="uint16" DEFAULT="0" PRESENT_IF="(FuncCode == 3)" COMMENT="Input parameter for Fix Pattern Trans"/>
+    <FIELDDEF NAME="NumOfTrans" DATATYPE="uint16" DEFAULT="0" PRESENT_IF="(FuncCode == 3)" COMMENT="Input parameter for Fix Pattern Trans"/>
+    <FIELDDEF NAME="Config" DATATYPE="uint8" DEFAULT="0" PRESENT_IF="(FuncCode == 4)" COMMENT="Input parameter for RM Fix Pattern Trans"/>
+    <FIELDDEF NAME="PreOffTime" DATATYPE="uint32" DEFAULT="0" PRESENT_IF="(FuncCode == 4)" COMMENT="Input parameter for RM Fix Pattern Trans"/>
+    <FIELDDEF NAME="PreOnTime" DATATYPE="uint32" DEFAULT="0" PRESENT_IF="(FuncCode == 4)" COMMENT="Input parameter for RM Fix Pattern Trans"/>
+    <FIELDDEF NAME="PostOnTime" DATATYPE="uint32" DEFAULT="0" PRESENT_IF="(FuncCode == 4)" COMMENT="Input parameter for RM Fix Pattern Trans"/>
+    <FIELDDEF NAME="PollingProfile" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(FuncCode == 5)" COMMENT="Input parameter for RF Start Polling Cycle"/>
+    <FIELDDEF NAME="LMTech" DATATYPE="byte" DEFAULT="0" PRESENT_IF="(FuncCode == 8)" COMMENT="Input parameter for Load modulation test"/>
+    <FIELDDEF NAME="TxPwr" DATATYPE="byte" DEFAULT="30" PRESENT_IF="(FuncCode == 8)" COMMENT="Input parameter for Load modulation test"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="MFW_TEST_RSP" ID="0x4F3A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT="Response to MFW_TEST_CMD">
+   <FIELDDEF NAME="Status"  DATATYPE="byte"   COMMENT="NCI Return Status"/>
+</STRUCTDEF>
+
+<STRUCTDEF NAME="MFW_TEST_NTF" ID="0x6F3A" TEMPLATE="NCI_CMD_NOTIF" KIND="DEVICE2HOST" COMMENT=" NTF carrying response info">
+  <FIELDDEF NAME="FuncCode" DATATYPE="byte" COMMENT="Code to select testing function"/>
+  <FIELDDEF NAME="Status"    DATATYPE="byte"  COMMENT="Command Status"/>
+  <FIELDDEF NAME="SessionID"    DATATYPE="byte"  ARRAYSIZE="TOEND"	PRESENT_IF="(FuncCode == 2)" COMMENT="Test Rsp Info"/>
+  <FIELDDEF NAME="RealRSSI"    DATATYPE="byte"  ARRAYSIZE="TOEND"	PRESENT_IF="(FuncCode == 6)" COMMENT="Test Rsp Info"/>
+  <FIELDDEF NAME="Technology" DATATYPE="byte"  PRESENT_IF="(FuncCode == 7)" COMMENT="Test Rsp Info"/>
+  <FIELDDEF NAME="DecodedData"    DATATYPE="byte"  ARRAYSIZE="TOEND"	PRESENT_IF="(FuncCode == 7)"  COMMENT="Test Rsp Info"/>
+  <FIELDDEF NAME="Data"    DATATYPE="byte"  ARRAYSIZE="TOEND" COMMENT="Test Rsp Info"/>
+</STRUCTDEF>
+
+
+<!-- ******************************************** NCI SPECIFIC DATA MESSAGE******************************************** -->
+
+<!-- NCI SELECT AID DATA-->
+ <STRUCTDEF NAME="NCI_DATA_SELECT_AID" ID="0x00" TEMPLATE="NCI_SPECIFIC_DATA"  KIND="HOST2DEVICE">
+    <FIELDDEF NAME="SelAid0"  DATATYPE="byte" DEFAULT="0" READONLY="1" />
+    <FIELDDEF NAME="SelAid1"  DATATYPE="byte" DEFAULT="0xA4" READONLY="1" />
+    <FIELDDEF NAME="SelAid2"  DATATYPE="byte" DEFAULT="0x04" READONLY="1" />
+    <FIELDDEF NAME="SelAid3"  DATATYPE="byte" DEFAULT="0x00" READONLY="1" />
+    <FIELDDEF NAME="AIDLen"  DATATYPE="byte" />
+    <FIELDDEF NAME="AID"  DATATYPE="byte" ARRAYSIZE="AIDLen" PRESENT_IF="(AIDLen > 0)" />
+ </STRUCTDEF>
+
+
+</STRUCTUREDEFS>
